@@ -25,7 +25,7 @@
     }
 
     // [BLUEPRINT LOCKED] 🔴 GANTI DENGAN URL WEB APP GOOGLE APPS SCRIPT ANDA
-    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbxlwkVGvPdQyJTII-ZE91aTIKaKfw7r8qdr4RZfkI0fbnzwLp59K-FyFMNkJ0xi7BJTZw/exec";
+    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbwaxBSQBYCfYDUAIgnKoYqT9N_55Up2WVESXOO6u5nuUNfoLBKuDQiKx1magjQnjmF6aQ/exec";
   </script>
 
   <style>
@@ -119,16 +119,25 @@
         </button>
       </div>
 
-      <!-- TAB 3: DATABASE & RIWAYAT [NEW INTERACTIVE DESIGN] -->
+      <!-- TAB 3: DATABASE & RIWAYAT (MEMBACA GOOGLE SPREADSHEET) -->
       <div id="tab-database" class="tab-content animate-fade-in">
-        <h2 class="text-2xl font-bold text-white mb-6 text-center tracking-wide"><i class="fas fa-database text-violet-500 mr-2"></i>Database & Riwayat Kategori</h2>
+        <h2 class="text-2xl font-bold text-white mb-6 text-center tracking-wide"><i class="fas fa-database text-violet-500 mr-2"></i>Database & Riwayat</h2>
+
+        <div class="flex justify-between items-center mb-3">
+          <label class="font-semibold text-slate-300"><i class="fas fa-history mr-2"></i>Riwayat Eksekusi (Dari Spreadsheet)</label>
+          <button onclick="fetchHistoryFromSpreadsheet()" class="text-xs bg-slate-800 hover:bg-slate-700 text-white px-3 py-1 rounded border border-white/10 transition-colors"><i class="fas fa-sync-alt mr-1"></i> Refresh</button>
+        </div>
+        <div class="flex overflow-x-auto no-scrollbar gap-4 pb-4 mb-6" id="historyContainer">
+          <p class="text-slate-500 italic text-sm"><i class="fas fa-spinner fa-spin mr-2"></i>Memuat riwayat dari Google Spreadsheet...</p>
+        </div>
+
+        <hr class="border-white/10 mb-6">
 
         <div class="flex flex-col md:flex-row md:justify-between md:items-end mb-4 gap-2">
-          <label class="font-semibold text-slate-300 block"><i class="fas fa-th-large mr-2"></i>Riwayat Eksekusi Data Aktif</label>
+          <label class="font-semibold text-slate-300 block"><i class="fas fa-th-large mr-2"></i>Rincian Data Aktif (Card View)</label>
           <span id="dataCountLabel" class="text-xs font-bold bg-violet-500/20 text-violet-300 px-3 py-1 rounded-full w-fit">0 Kategori</span>
         </div>
 
-        <!-- Pencarian Kategori -->
         <div class="bg-slate-800/80 rounded-xl p-3 border border-white/5 mb-6">
           <div class="relative w-full">
             <i class="fas fa-search absolute left-4 top-3 text-slate-400"></i>
@@ -136,7 +145,6 @@
           </div>
         </div>
 
-        <!-- Container Kartu Kategori -->
         <div id="dbDataContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 max-h-[500px] overflow-y-auto pr-2 pb-4">
           <div class="col-span-full text-center text-slate-500 py-10 bg-slate-800/30 rounded-xl border border-white/5">
             Silakan unggah database di menu Split terlebih dahulu.
@@ -157,25 +165,19 @@
     </div>
   </div>
 
-  <!-- MODAL RINCIAN PER KATEGORI (NEW) -->
+  <!-- MODAL RINCIAN PER KATEGORI [LOCKED] -->
   <div id="detailModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-[100] hidden flex-col justify-center items-center px-4">
     <div class="bg-slate-800 border border-white/20 rounded-2xl w-full max-w-5xl max-h-[90vh] flex flex-col shadow-2xl animate-slide-up">
-      <!-- Header Modal -->
       <div class="p-5 border-b border-white/10 flex justify-between items-center bg-slate-900/50 rounded-t-2xl">
         <h3 id="modalTitle" class="text-xl font-bold text-violet-400 flex items-center"></h3>
         <button onclick="closeModal()" class="text-slate-400 hover:text-white transition-colors"><i class="fas fa-times text-2xl"></i></button>
       </div>
-      
-      <!-- Body Modal -->
       <div class="p-6 overflow-y-auto flex-1 custom-scrollbar">
-        <!-- Sub-Rincian (Breakdown) -->
         <div class="mb-6">
           <h4 id="modalBreakdownTitle" class="text-sm font-bold text-slate-300 mb-3 border-b border-white/5 pb-2"></h4>
           <div id="modalBreakdown" class="grid grid-cols-2 md:grid-cols-4 gap-3"></div>
         </div>
-        
-        <!-- Tabel Preview Data -->
-        <h4 class="text-sm font-bold text-slate-300 mb-3 border-b border-white/5 pb-2"><i class="fas fa-table mr-2"></i>Preview Tabel Baris Data (100 Teratas)</h4>
+        <h4 class="text-sm font-bold text-slate-300 mb-3 border-b border-white/5 pb-2"><i class="fas fa-table mr-2"></i>Preview Tabel Baris Data</h4>
         <div class="overflow-x-auto rounded-xl border border-white/10 bg-slate-900/30">
           <table class="w-full text-xs text-left text-slate-300">
             <thead id="modalTableHead" class="text-[11px] text-slate-400 uppercase bg-slate-900/80 whitespace-nowrap"></thead>
@@ -212,7 +214,6 @@
       activeBtn.classList.add('border-violet-500', 'text-white', 'bg-white/5');
     }
 
-    // --- SYSTEM STATE ---
     let globalData = [];
     let originalFileName = "";
     const logBox = document.getElementById('logBox');
@@ -225,7 +226,45 @@
       logBox.scrollTop = logBox.scrollHeight;
     }
 
-    // --- UPLOAD & PARSE DATA ---
+    // --- FITUR BARU: MEMBACA RIWAYAT SPREADSHEET VIA API GAS ---
+    async function fetchHistoryFromSpreadsheet() {
+      const container = document.getElementById('historyContainer');
+      container.innerHTML = '<p class="text-slate-500 italic text-sm"><i class="fas fa-spinner fa-spin mr-2"></i>Mengambil data dari Spreadsheet...</p>';
+      
+      try {
+        const res = await fetch(GAS_API_URL, {
+          method: 'POST', body: JSON.stringify({ action: 'getLog' }), headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+        });
+        const result = await res.json();
+        
+        if (result.status === 'success' && result.data && result.data.length > 0) {
+          // Balik urutan agar yang terbaru di atas, dan batasi 15 terakhir
+          const historyData = result.data.reverse().slice(0, 15);
+          container.innerHTML = historyData.map(item => `
+            <div class="min-w-[280px] bg-slate-800 border border-white/10 p-4 rounded-2xl shadow-lg flex-shrink-0 animate-fade-in">
+              <div class="flex justify-between items-center mb-3">
+                <span class="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-1 rounded-full"><i class="fas fa-cloud-download-alt mr-1"></i> ${item.date}</span>
+              </div>
+              <p class="text-white font-bold text-sm mb-1 truncate" title="${item.fileName}">${item.fileName}</p>
+              <p class="text-slate-400 text-xs mb-3">Acuan: <span class="text-indigo-300">${item.colName}</span></p>
+              <div class="flex justify-between border-t border-white/5 pt-3">
+                <span class="text-xs font-bold text-slate-300"><i class="fas fa-list-ol mr-1"></i> ${item.totalRows} Baris</span>
+                <span class="text-xs font-bold text-slate-300"><i class="fas fa-folder mr-1"></i> ${item.totalCats} File</span>
+              </div>
+            </div>
+          `).join('');
+        } else {
+          container.innerHTML = '<p class="text-slate-500 italic text-sm">Spreadsheet aktif, namun belum ada riwayat tersimpan.</p>';
+        }
+      } catch (error) {
+        container.innerHTML = `<p class="text-red-400 italic text-sm">Gagal memuat riwayat: Pastikan URL GAS benar dan sudah di-Deploy versi baru.</p>`;
+      }
+    }
+
+    // Panggil saat aplikasi dimuat
+    document.addEventListener("DOMContentLoaded", fetchHistoryFromSpreadsheet);
+
+    // --- UPLOAD & PARSE DATA [LOCKED] ---
     document.getElementById('fileUpload').addEventListener('change', function(e) {
       const file = e.target.files[0];
       if (!file) return;
@@ -268,14 +307,8 @@
       reader.readAsArrayBuffer(file);
     });
 
-    document.getElementById('columnSelect').addEventListener('change', () => {
-      updateDashboard();
-      renderDataCards();
-    });
-    
-    document.getElementById('selectAll').addEventListener('change', e => {
-      document.querySelectorAll('.cat-checkbox').forEach(cb => cb.checked = e.target.checked);
-    });
+    document.getElementById('columnSelect').addEventListener('change', () => { updateDashboard(); renderDataCards(); });
+    document.getElementById('selectAll').addEventListener('change', e => { document.querySelectorAll('.cat-checkbox').forEach(cb => cb.checked = e.target.checked); });
 
     // --- DASHBOARD UPDATE [LOCKED] ---
     function updateDashboard() {
@@ -306,7 +339,7 @@
       document.getElementById('selectAll').checked = true;
     }
 
-    // --- DATABASE CARDS KATEGORI (NEW INTERACTIVE) ---
+    // --- DATABASE CARDS KATEGORI [LOCKED] ---
     function renderDataCards() {
       const container = document.getElementById('dbDataContainer');
       const colName = document.getElementById('columnSelect').value;
@@ -314,7 +347,6 @@
       
       if(globalData.length === 0) return;
 
-      // Grouping data by Category
       const grouped = {};
       globalData.forEach(row => {
         const val = row[colName] || 'Uncategorized';
@@ -322,11 +354,8 @@
         grouped[val].push(row);
       });
 
-      // Filter Categories based on search
       let categories = Object.keys(grouped).sort();
-      if (filterVal) {
-        categories = categories.filter(c => c.toLowerCase().includes(filterVal));
-      }
+      if (filterVal) categories = categories.filter(c => c.toLowerCase().includes(filterVal));
 
       document.getElementById('dataCountLabel').innerText = `${categories.length} Kategori`;
 
@@ -335,10 +364,8 @@
          return;
       }
 
-      // Render Cards
       container.innerHTML = categories.map(cat => {
          const count = grouped[cat].length;
-         // Pass string safely
          const safeCat = cat.replace(/'/g, "\\'").replace(/"/g, '\\"');
          return `
          <div onclick="openModal('${safeCat}')" class="bg-slate-800/80 p-5 rounded-xl border border-white/10 hover:border-violet-500 hover:shadow-[0_0_20px_rgba(107,70,193,0.3)] transition-all cursor-pointer transform hover:-translate-y-1 group">
@@ -353,16 +380,14 @@
       }).join('');
     }
 
-    // --- MODAL LOGIC (SUB-BREAKDOWN & TABLE) ---
+    // --- MODAL LOGIC [LOCKED] ---
     function openModal(category) {
       const colName = document.getElementById('columnSelect').value;
       const data = globalData.filter(r => (r[colName] || 'Uncategorized') === category);
       const headers = Object.keys(data[0] || {});
       
-      // Update Title
       document.getElementById('modalTitle').innerHTML = `<i class="fas fa-layer-group mr-3"></i> ${category} <span class="ml-3 text-xs bg-violet-500 text-white px-3 py-1 rounded-full shadow-lg">Total: ${data.length}</span>`;
       
-      // Auto-detect sub-category (KEC_NAME atau kolom ke-2)
       let subCol = headers.includes('KEC_NAME') ? 'KEC_NAME' : (headers.includes('KEL_NAME') ? 'KEL_NAME' : headers[1]);
       document.getElementById('modalBreakdownTitle').innerHTML = `<i class="fas fa-chart-pie mr-2"></i>Rincian per ${subCol}:`;
       
@@ -372,7 +397,6 @@
         subGroup[val] = (subGroup[val] || 0) + 1;
       });
 
-      // Render Rincian Kotak
       document.getElementById('modalBreakdown').innerHTML = Object.keys(subGroup).sort().map(sub => `
         <div class="bg-slate-900/80 p-3 rounded-lg border border-white/5 flex justify-between items-center shadow-inner">
           <span class="text-xs text-slate-300 truncate mr-2 font-medium" title="${sub}">${sub}</span>
@@ -380,7 +404,6 @@
         </div>
       `).join('');
 
-      // Render Tabel Preview
       document.getElementById('modalTableHead').innerHTML = `<tr>${headers.map(h => `<th class="px-4 py-3 border-b border-white/10">${h}</th>`).join('')}</tr>`;
       
       const limitData = data.slice(0, 100);
@@ -405,12 +428,11 @@
       modal.classList.remove('flex');
     }
 
-    // --- FORMAT EXCEL (AUTO-FIT KOLOM & AUTO-FILTER) ---
+    // --- FORMAT EXCEL (AUTO-FIT KOLOM & AUTO-FILTER) [LOCKED] ---
     function applyNeatExcelFormat(ws, dataToFormat) {
       if(!dataToFormat || dataToFormat.length === 0) return;
       const keys = Object.keys(dataToFormat[0]);
       
-      // Auto-fit kolom agar tidak terpotong
       const wscols = keys.map(key => {
         let maxLen = key.length;
         dataToFormat.forEach(row => {
@@ -419,16 +441,15 @@
             if (len > maxLen) maxLen = len;
           }
         });
-        return { wch: Math.min(maxLen + 2, 50) }; // Padding 2, max width 50
+        return { wch: Math.min(maxLen + 2, 50) }; 
       });
       ws['!cols'] = wscols;
 
-      // Auto-Filter (Dropdown di Header)
       const range = XLSX.utils.decode_range(ws['!ref']);
       ws['!autofilter'] = { ref: XLSX.utils.encode_range(range) };
     }
 
-    // --- PROSES & UPLOAD (DRIVE + SPREADSHEET) [LOCKED] ---
+    // --- PROSES & UPLOAD [LOCKED] ---
     document.getElementById('processBtn').addEventListener('click', async function() {
       const colName = document.getElementById('columnSelect').value;
       const selectedCats = Array.from(document.querySelectorAll('.cat-checkbox:checked')).map(cb => cb.value);
@@ -455,12 +476,12 @@
         } catch (e) { throw new Error(e.message); }
       };
 
-      // A. Master File (Dengan Format Rapi)
+      // A. Master File 
       loaderText.innerText = "Membentuk File Master Keseluruhan yang Rapi...";
       await new Promise(r => setTimeout(r, 100));
       try {
         const wsMaster = XLSX.utils.json_to_sheet(globalData);
-        applyNeatExcelFormat(wsMaster, globalData); // Apply formatting!
+        applyNeatExcelFormat(wsMaster, globalData); 
         
         const wbMaster = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wbMaster, wsMaster, "Master Data");
@@ -470,7 +491,7 @@
         if(res.status === 'success') addLog(`✓ Master Rapi Tersimpan di Drive!`, "text-green-400");
       } catch (e) { addLog(`✗ Error Master: ${e.message}`, "text-red-400"); }
 
-      // B. Split Files (Dengan Format Rapi)
+      // B. Split Files 
       for (let i = 0; i < selectedCats.length; i++) {
         const cat = selectedCats[i];
         loaderText.innerText = `Menyimpan Split: ${cat} (${i+1}/${selectedCats.length})...`;
@@ -482,7 +503,7 @@
           const safeCatName = String(cat).replace(/[/\\?%*:|"<>]/g, '-');
           
           const ws = XLSX.utils.json_to_sheet(filteredData);
-          applyNeatExcelFormat(ws, filteredData); // Apply formatting!
+          applyNeatExcelFormat(ws, filteredData); 
           
           const wb = XLSX.utils.book_new();
           XLSX.utils.book_append_sheet(wb, ws, "Data");
@@ -501,8 +522,10 @@
           action: 'saveLog', fileName: originalFileName, colName: colName, 
           totalCats: selectedCats.length, totalRows: globalData.length 
         });
-        if (resLog.status === 'success') addLog("✓ Riwayat sukses terekam di Spreadsheet Auto Sempurna!", "text-green-400 font-bold");
-        else addLog(`✗ Spreadsheet Error: ${resLog.message}`, "text-red-400");
+        if (resLog.status === 'success') {
+          addLog("✓ Riwayat sukses terekam di Spreadsheet Auto Sempurna!", "text-green-400 font-bold");
+          fetchHistoryFromSpreadsheet(); // Auto-refresh riwayat di Database
+        } else addLog(`✗ Spreadsheet Error: ${resLog.message}`, "text-red-400");
       } catch (e) { addLog(`✗ Gagal rekap riwayat: ${e.message}`, "text-red-400"); }
 
       loader.classList.remove('flex');
