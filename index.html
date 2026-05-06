@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>Agenda Split Data Enterprise</title>
+  
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- SheetJS -->
+  <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+  <!-- FontAwesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <script>
+    // Konfigurasi Tailwind Custom Colors
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: { slate: { 850: '#151e2e', 900: '#0f172a' } },
+          animation: { 'fade-in': 'fadeIn 0.4s ease-out forwards', 'spin-slow': 'spin 3s linear infinite' },
+          keyframes: { fadeIn: { '0%': { opacity: '0', transform: 'translateY(10px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } } }
+        }
+      }
+    }
+
+    // 🔴 GANTI DENGAN URL WEB APP GOOGLE APPS SCRIPT ANDA
+    const GAS_API_URL = "https://script.google.com/macros/s/AKfycby5-0YPjqjhMPUwGP3mttFgOaL7PATiuGoF6hJWJB2iM4BYFQW5pkRCmGAL9fjCDYeIGQ/exec";
+  </script>
+
+  <style>
+    body { background-color: #0f172a; color: #f8fafc; font-family: 'Segoe UI', Roboto, sans-serif; overflow-x: hidden; }
+    
+    /* Custom Scrollbar for Logs */
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.05); border-radius: 10px; }
+    ::-webkit-scrollbar-thumb { background: rgba(139, 92, 246, 0.3); border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(139, 92, 246, 0.6); }
+
+    .glass-panel { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col items-center py-6 px-4">
+
+  <!-- Main Container -->
+  <div class="w-full max-w-4xl glass-panel rounded-3xl shadow-[0_0_50px_rgba(107,70,193,0.15)] overflow-hidden transition-all">
+    
+    <!-- Navigation Tabs -->
+    <div class="flex w-full bg-slate-800/60 border-b border-white/10 sticky top-0 z-10">
+      <button onclick="switchTab('dashboard')" id="btn-dashboard" class="flex-1 py-4 text-sm md:text-base font-semibold border-b-2 border-violet-500 text-white bg-white/5 transition-all">
+        <i class="fas fa-chart-pie mr-2"></i> <span class="hidden sm:inline">Agenda </span>Dashboard
+      </button>
+      <button onclick="switchTab('split')" id="btn-split" class="flex-1 py-4 text-sm md:text-base font-semibold border-b-2 border-transparent text-slate-400 hover:text-white hover:bg-white/5 transition-all">
+        <i class="fas fa-layer-group mr-2"></i> <span class="hidden sm:inline">Agenda </span>Split
+      </button>
+      <button onclick="switchTab('log')" id="btn-log" class="flex-1 py-4 text-sm md:text-base font-semibold border-b-2 border-transparent text-slate-400 hover:text-white hover:bg-white/5 transition-all">
+        <i class="fas fa-terminal mr-2"></i> <span class="hidden sm:inline">Agenda </span>Log
+      </button>
+    </div>
+
+    <!-- Content Area -->
+    <div class="p-6 md:p-8">
+
+      <!-- TAB 1: DASHBOARD -->
+      <div id="tab-dashboard" class="tab-content active animate-fade-in">
+        <h2 class="text-2xl font-bold text-white mb-6 text-center tracking-wide">
+          <i class="fas fa-chart-bar text-violet-500 mr-2"></i>Statistik Database
+        </h2>
+        
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
+          <div class="bg-slate-800/80 rounded-2xl p-6 text-center border border-white/5">
+            <div id="dashRows" class="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-indigo-400 mb-2">0</div>
+            <div class="text-xs font-bold text-slate-400 uppercase tracking-widest">Total Baris</div>
+          </div>
+          <div class="bg-slate-800/80 rounded-2xl p-6 text-center border border-white/5">
+            <div id="dashCats" class="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-indigo-400 mb-2">0</div>
+            <div class="text-xs font-bold text-slate-400 uppercase tracking-widest">Kategori Unik</div>
+          </div>
+          <div class="bg-slate-800/80 rounded-2xl p-6 text-center border border-white/5 col-span-2 md:col-span-1">
+            <div id="dashCols" class="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-indigo-400 mb-2">0</div>
+            <div class="text-xs font-bold text-slate-400 uppercase tracking-widest">Total Kolom</div>
+          </div>
+        </div>
+
+        <label class="font-semibold text-slate-300 mb-4 block"><i class="fas fa-list-ul mr-2"></i>Rincian Kategori:</label>
+        <div id="rincianBox" class="bg-slate-800/50 rounded-2xl border border-white/5 p-4 max-h-72 overflow-y-auto">
+          <p class="text-center text-slate-500 py-8">Belum ada data. Silakan ke menu Agenda Split.</p>
+        </div>
+      </div>
+
+      <!-- TAB 2: SPLIT -->
+      <div id="tab-split" class="tab-content animate-fade-in">
+        <h2 class="text-2xl font-bold text-white mb-6 text-center tracking-wide">
+          <i class="fas fa-folder-tree text-violet-500 mr-2"></i>Arsip & Eksekusi Split
+        </h2>
+        
+        <div class="mb-6">
+          <label class="font-semibold text-slate-300 mb-3 block">1. Upload Database (Excel Mentah)</label>
+          <div class="relative">
+            <input type="file" id="fileUpload" accept=".xlsx, .xls" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
+            <div class="bg-slate-800 border border-slate-600 hover:border-violet-500 rounded-xl p-5 flex items-center justify-center transition-all duration-300">
+              <i class="fas fa-cloud-upload-alt text-3xl text-violet-500 mr-3"></i>
+              <span class="text-slate-300 font-medium text-lg">Pilih File Excel</span>
+            </div>
+          </div>
+          <p id="fileInfoLabel" class="text-violet-400 font-bold mt-2 text-sm hidden"></p>
+        </div>
+
+        <div id="step2" class="mb-6 animate-fade-in hidden">
+          <label class="font-semibold text-slate-300 mb-3 block">2. Pilih Acuan Pemisah</label>
+          <select id="columnSelect" class="w-full bg-slate-800 border border-slate-600 text-white rounded-xl p-4 focus:ring-2 focus:ring-violet-500 focus:outline-none transition-all outline-none appearance-none"></select>
+        </div>
+
+        <div id="step3" class="mb-6 animate-fade-in hidden">
+          <label class="font-semibold text-slate-300 mb-3 block">3. Pilih Kategori Target</label>
+          <label class="flex items-center bg-slate-800/80 p-4 rounded-xl border border-violet-500/30 cursor-pointer mb-3">
+            <input type="checkbox" id="selectAll" checked class="w-5 h-5 accent-violet-500 mr-3" />
+            <span class="font-bold text-white">Pilih Semua Kategori</span>
+          </label>
+          <div id="checklistContainer" class="bg-slate-800/50 rounded-xl border border-white/5 p-2 max-h-60 overflow-y-auto"></div>
+        </div>
+
+        <button id="processBtn" class="hidden w-full bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-bold py-4 rounded-xl shadow-[0_0_20px_rgba(107,70,193,0.4)] hover:shadow-[0_0_30px_rgba(107,70,193,0.6)] transition-all flex justify-center items-center gap-3 transform hover:-translate-y-1">
+          <i class="fas fa-rocket"></i> Proses & Upload ke Drive
+        </button>
+      </div>
+
+      <!-- TAB 3: LOG -->
+      <div id="tab-log" class="tab-content animate-fade-in">
+        <h2 class="text-2xl font-bold text-white mb-6 text-center tracking-wide">
+          <i class="fas fa-terminal text-violet-500 mr-2"></i>Console Log
+        </h2>
+        <div id="logBox" class="bg-[#0a0f1d] border border-white/10 rounded-2xl p-5 font-mono text-xs md:text-sm h-96 overflow-y-auto shadow-inner">
+          <div class="mb-2 pb-2 border-b border-white/5 flex gap-3 items-start text-blue-400">
+            <span class="text-slate-600 whitespace-nowrap">[System]</span><span>Menunggu instruksi data...</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- LOADING OVERLAY -->
+  <div id="loaderOverlay" class="fixed inset-0 bg-slate-900/90 backdrop-blur-md z-50 hidden flex-col justify-center items-center px-4 animate-fade-in">
+    <div class="relative w-24 h-24 mb-8">
+      <div class="absolute inset-0 border-4 border-violet-500/20 rounded-full"></div>
+      <div class="absolute inset-0 border-4 border-violet-500 rounded-full border-t-transparent animate-spin"></div>
+      <div class="absolute inset-0 flex items-center justify-center">
+        <i class="fas fa-cloud text-2xl text-indigo-400 animate-pulse"></i>
+      </div>
+    </div>
+    <h3 class="text-2xl font-bold text-white mb-2 text-center" id="loaderTitle">Memproses & Sinkronisasi Drive...</h3>
+    <p class="text-indigo-400 font-medium text-center text-lg" id="loaderText">Menyiapkan koneksi API...</p>
+    <div class="mt-8 px-6 py-2 bg-white/5 border border-white/10 rounded-full">
+      <p class="text-slate-400 text-sm"><i class="fas fa-shield-alt mr-2"></i>Jalur aman HTTPS aktif</p>
+    </div>
+  </div>
+
+  <script>
+    // --- UI NAVIGATION ---
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      ['dashboard', 'split', 'log'].forEach(id => {
+        const btn = document.getElementById('btn-' + id);
+        btn.classList.remove('border-violet-500', 'text-white', 'bg-white/5');
+        btn.classList.add('border-transparent', 'text-slate-400');
+      });
+      
+      document.getElementById('tab-' + tabId).classList.add('active');
+      const activeBtn = document.getElementById('btn-' + tabId);
+      activeBtn.classList.remove('border-transparent', 'text-slate-400');
+      activeBtn.classList.add('border-violet-500', 'text-white', 'bg-white/5');
+    }
+
+    // --- SYSTEM LOGIC ---
+    let globalData = [];
+    let originalFileName = "";
+    const logBox = document.getElementById('logBox');
+
+    function addLog(msg, colorClass = "text-blue-400") {
+      const time = new Date().toLocaleTimeString();
+      const div = document.createElement('div');
+      div.className = `mb-2 pb-2 border-b border-white/5 flex gap-3 items-start animate-fade-in ${colorClass}`;
+      div.innerHTML = `<span class="text-slate-600 whitespace-nowrap">[${time}]</span><span class="leading-relaxed">${msg}</span>`;
+      logBox.appendChild(div);
+      logBox.scrollTop = logBox.scrollHeight;
+    }
+
+    // 1. UPLOAD FILE EXCEL
+    document.getElementById('fileUpload').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      originalFileName = file.name.replace(/\.[^/.]+$/, "");
+      document.getElementById('fileInfoLabel').innerText = `Aktif: ${file.name}`;
+      document.getElementById('fileInfoLabel').classList.remove('hidden');
+      addLog(`Memuat file Excel: ${file.name}`, "text-blue-400");
+
+      const reader = new FileReader();
+      reader.onload = function(event) {
+        try {
+          const data = new Uint8Array(event.target.result);
+          const workbook = XLSX.read(data, { type: 'array' });
+          const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+          
+          globalData = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
+          
+          if (globalData.length > 0) {
+            const headers = Object.keys(globalData[0]);
+            const colSelect = document.getElementById('columnSelect');
+            colSelect.innerHTML = '';
+            
+            headers.forEach(h => {
+              const opt = document.createElement('option');
+              opt.value = h; opt.text = h; colSelect.appendChild(opt);
+            });
+
+            if (headers.includes('KAB_NAME')) colSelect.value = 'KAB_NAME';
+            
+            document.getElementById('step2').classList.remove('hidden');
+            document.getElementById('step3').classList.remove('hidden');
+            document.getElementById('processBtn').classList.remove('hidden');
+            document.getElementById('processBtn').classList.add('flex');
+            
+            updateDashboard();
+            addLog(`Sukses membaca ${globalData.length} baris data.`, "text-green-400 font-bold");
+            switchTab('dashboard');
+          }
+        } catch (err) {
+          addLog(`Error parsing file: ${err.message}`, "text-red-400");
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    });
+
+    document.getElementById('columnSelect').addEventListener('change', updateDashboard);
+
+    // 2. DASHBOARD & CHECKLIST UPDATE
+    function updateDashboard() {
+      const colName = document.getElementById('columnSelect').value;
+      const countMap = {};
+      
+      globalData.forEach(row => {
+        const val = row[colName];
+        if (val) countMap[val] = (countMap[val] || 0) + 1;
+      });
+
+      const uniqueCats = Object.keys(countMap).sort();
+
+      // Update Dashboard UI
+      document.getElementById('dashRows').innerText = globalData.length;
+      document.getElementById('dashCols').innerText = Object.keys(globalData[0]).length;
+      document.getElementById('dashCats').innerText = uniqueCats.length;
+
+      const rincianBox = document.getElementById('rincianBox');
+      const checklistContainer = document.getElementById('checklistContainer');
+      rincianBox.innerHTML = ''; checklistContainer.innerHTML = '';
+
+      uniqueCats.forEach(cat => {
+        // Rincian
+        const div = document.createElement('div');
+        div.className = "flex justify-between items-center py-3 border-b border-white/5 last:border-0 animate-fade-in";
+        div.innerHTML = `<span class="text-slate-300"><i class="fas fa-tag text-slate-600 mr-3"></i>${cat}</span><span class="bg-violet-500/20 text-violet-300 px-3 py-1 rounded-full text-xs font-bold">${countMap[cat]} Data</span>`;
+        rincianBox.appendChild(div);
+
+        // Checklist
+        const label = document.createElement('label');
+        label.className = "flex items-center p-3 hover:bg-white/5 rounded-lg cursor-pointer transition-colors animate-fade-in";
+        label.innerHTML = `<input type="checkbox" class="cat-checkbox w-5 h-5 accent-violet-500 mr-3" value="${cat}" checked> <span class="text-slate-300 flex-1">${cat}</span> <span class="text-xs text-slate-500 font-bold">(${countMap[cat]})</span>`;
+        checklistContainer.appendChild(label);
+      });
+
+      addLog(`Acuan [${colName}]. Target: ${uniqueCats.length} pemisahan.`, "text-blue-400");
+      document.getElementById('selectAll').checked = true;
+    }
+
+    document.getElementById('selectAll').addEventListener('change', function(e) {
+      document.querySelectorAll('.cat-checkbox').forEach(cb => cb.checked = e.target.checked);
+    });
+
+    // 3. PROSES & UPLOAD VIA API GAS
+    document.getElementById('processBtn').addEventListener('click', async function() {
+      const colName = document.getElementById('columnSelect').value;
+      const selectedCats = Array.from(document.querySelectorAll('.cat-checkbox:checked')).map(cb => cb.value);
+
+      if (selectedCats.length === 0) return alert("Centang minimal satu kategori!");
+
+      const loader = document.getElementById('loaderOverlay');
+      const loaderText = document.getElementById('loaderText');
+      loader.classList.remove('hidden');
+      loader.classList.add('flex');
+      switchTab('log');
+
+      const masterFolderName = originalFileName;
+      addLog(`MEMULAI PROSES: Target Folder Drive [${masterFolderName}]`, "text-yellow-400 font-bold");
+
+      const sendToGAS = async (base64Data, fileName) => {
+        try {
+          const res = await fetch(GAS_API_URL, {
+            method: 'POST',
+            body: JSON.stringify({ base64Data, fileName, subFolderName: masterFolderName }),
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+          });
+          return await res.json();
+        } catch (e) { throw new Error(e.message); }
+      };
+
+      // A. Master File
+      loaderText.innerText = "Menyimpan File Master Keseluruhan...";
+      addLog("Mengirim File Master...", "text-blue-400");
+      await new Promise(r => setTimeout(r, 100)); // UI delay
+
+      try {
+        const wsMaster = XLSX.utils.json_to_sheet(globalData);
+        const wbMaster = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wbMaster, wsMaster, "Master Data");
+        const b64Master = XLSX.write(wbMaster, { bookType: 'xlsx', type: 'base64' });
+        
+        const res = await sendToGAS(b64Master, `[MASTER ALL DATA] ${originalFileName}.xlsx`);
+        if(res.status === 'success') addLog(`✓ Master Tersimpan!`, "text-green-400");
+        else addLog(`✗ Gagal Master: ${res.message}`, "text-red-400");
+      } catch (e) { addLog(`✗ Error Jaringan: ${e.message}`, "text-red-400"); }
+
+      // B. Split Files
+      for (let i = 0; i < selectedCats.length; i++) {
+        const cat = selectedCats[i];
+        loaderText.innerText = `Menyimpan Split: ${cat} (${i+1}/${selectedCats.length})...`;
+        
+        const filteredData = globalData.filter(r => r[colName] == cat);
+        const safeCatName = String(cat).replace(/[/\\?%*:|"<>]/g, '-');
+        const newFileName = `${safeCatName} - ${originalFileName}.xlsx`;
+        
+        addLog(`[${i+1}/${selectedCats.length}] Mengirim ${newFileName}...`, "text-blue-400");
+        await new Promise(r => setTimeout(r, 100)); // UI delay
+
+        try {
+          const ws = XLSX.utils.json_to_sheet(filteredData);
+          const wb = XLSX.utils.book_new();
+          XLSX.utils.book_append_sheet(wb, ws, "Data");
+          const b64Str = XLSX.write(wb, { bookType: 'xlsx', type: 'base64' });
+
+          const res = await sendToGAS(b64Str, newFileName);
+          if(res.status === 'success') addLog(`✓ Tersimpan: ${newFileName}`, "text-green-400");
+          else addLog(`✗ Gagal: ${res.message}`, "text-red-400");
+        } catch (e) { addLog(`✗ Error Jaringan: ${e.message}`, "text-red-400"); }
+      }
+
+      loader.classList.remove('flex');
+      loader.classList.add('hidden');
+      addLog(`PROSES TUNTAS. Semua file berhasil diamankan ke Google Drive.`, "text-green-400 font-bold text-lg");
+      alert("Proses Selesai!\nSilakan periksa Google Drive Anda.");
+    });
+  </script>
+</body>
+</html>
