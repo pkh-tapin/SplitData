@@ -5,11 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
   <title>Agenda Split Data Enterprise</title>
   
-  <!-- Tailwind CSS via CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- SheetJS -->
   <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
-  <!-- FontAwesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
   <script>
@@ -115,15 +112,15 @@
           <div id="checklistContainer" class="bg-slate-800/50 rounded-xl border border-white/5 p-2 max-h-60 overflow-y-auto"></div>
         </div>
         <button id="processBtn" class="hidden w-full bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 text-white font-bold py-4 rounded-xl shadow-[0_0_20px_rgba(107,70,193,0.4)] transition-all flex justify-center items-center gap-3">
-          <i class="fas fa-rocket"></i> Proses & Upload ke Drive
+          <i class="fas fa-rocket"></i> Proses & Sinkronisasi
         </button>
       </div>
 
-      <!-- TAB 3: DATABASE & RIWAYAT [NEW FULL FEATURE] -->
+      <!-- TAB 3: DATABASE & RIWAYAT [LOCKED] -->
       <div id="tab-database" class="tab-content animate-fade-in">
         <h2 class="text-2xl font-bold text-white mb-6 text-center tracking-wide"><i class="fas fa-database text-violet-500 mr-2"></i>Database & Riwayat</h2>
 
-        <label class="font-semibold text-slate-300 mb-3 block"><i class="fas fa-history mr-2"></i>Riwayat Eksekusi (Lokal & G-Sheet)</label>
+        <label class="font-semibold text-slate-300 mb-3 block"><i class="fas fa-history mr-2"></i>Riwayat Eksekusi (Lokal)</label>
         <div class="flex overflow-x-auto no-scrollbar gap-4 pb-4 mb-6" id="historyContainer">
           <p class="text-slate-500 italic text-sm">Belum ada riwayat split di perangkat ini.</p>
         </div>
@@ -243,7 +240,7 @@
             document.getElementById('processBtn').classList.add('flex');
             
             updateDashboard();
-            renderDataCards(); // Tampilkan Kartu di menu Database
+            renderDataCards(); 
             
             addLog(`Sukses membaca ${globalData.length} baris data.`, "text-green-400 font-bold");
             switchTab('dashboard');
@@ -287,7 +284,7 @@
       document.getElementById('selectAll').checked = true;
     }
 
-    // 3. DATABASE CARDS & HISTORY LOGIC
+    // 3. DATABASE CARDS & HISTORY
     function renderDataCards() {
       const container = document.getElementById('dbDataContainer');
       const filterCol = document.getElementById('dbFilterCol').value;
@@ -303,7 +300,7 @@
       }
 
       document.getElementById('dataCountLabel').innerText = `${filteredData.length} Data`;
-      const renderData = filteredData.slice(0, 50); // Limit render agar tidak lag (HP friendly)
+      const renderData = filteredData.slice(0, 50);
 
       container.innerHTML = renderData.map(row => {
          const keys = Object.keys(row);
@@ -319,7 +316,7 @@
       }).join('');
 
       if(filteredData.length > 50) {
-         container.innerHTML += `<div class="col-span-full text-center text-slate-500 text-xs mt-4 py-4 bg-white/5 rounded-xl border border-white/5">Menampilkan 50 data teratas dari ${filteredData.length}. Gunakan pencarian untuk hasil spesifik.</div>`;
+         container.innerHTML += `<div class="col-span-full text-center text-slate-500 text-xs mt-4 py-4 bg-white/5 rounded-xl border border-white/5">Menampilkan 50 data teratas dari ${filteredData.length}.</div>`;
       } else if(filteredData.length === 0) {
          container.innerHTML = `<div class="col-span-full text-center text-slate-500 py-10 bg-slate-800/30 rounded-xl">Data tidak ditemukan.</div>`;
       }
@@ -352,12 +349,12 @@
         date: new Date().toLocaleString('id-ID', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
         fileName, colName, totalRows, totalCats
       });
-      if(history.length > 10) history.shift(); // Max 10 riwayat lokal
+      if(history.length > 10) history.shift(); 
       localStorage.setItem('agendaSplitHistory', JSON.stringify(history));
       renderHistoryCards();
     }
 
-    // 4. PROSES & UPLOAD VIA API GAS [DRIVE & SPREADSHEET]
+    // 4. PROSES & UPLOAD (DRIVE + SPREADSHEET) AUTO SEMPURNA
     document.getElementById('processBtn').addEventListener('click', async function() {
       const colName = document.getElementById('columnSelect').value;
       const selectedCats = Array.from(document.querySelectorAll('.cat-checkbox:checked')).map(cb => cb.value);
@@ -371,18 +368,21 @@
       switchTab('log');
 
       const masterFolderName = originalFileName;
-      addLog(`MEMULAI PROSES: Target Folder Drive [${masterFolderName}]`, "text-yellow-400 font-bold");
+      addLog(`MEMULAI PROSES: Sinkronisasi ke Drive & Spreadsheet`, "text-yellow-400 font-bold");
 
+      // Fungsi Fetch Anti-Error
       const sendToGAS = async (payload) => {
         try {
           const res = await fetch(GAS_API_URL, {
             method: 'POST', body: JSON.stringify(payload), headers: { 'Content-Type': 'text/plain;charset=utf-8' }
           });
-          return await res.json();
+          const text = await res.text();
+          try { return JSON.parse(text); } 
+          catch(e) { throw new Error(`GAS Error (Pastikan URL & Versi Deploy benar): ${text.substring(0,50)}`); }
         } catch (e) { throw new Error(e.message); }
       };
 
-      // A. Master File
+      // A. Master File ke Drive
       loaderText.innerText = "Menyimpan File Master Keseluruhan...";
       await new Promise(r => setTimeout(r, 100));
       try {
@@ -392,14 +392,14 @@
         const b64Master = XLSX.write(wbMaster, { bookType: 'xlsx', type: 'base64' });
         
         const res = await sendToGAS({ action: 'saveExcel', base64Data: b64Master, fileName: `[MASTER ALL DATA] ${originalFileName}.xlsx`, subFolderName: masterFolderName });
-        if(res.status === 'success') addLog(`✓ Master Tersimpan!`, "text-green-400");
+        if(res.status === 'success') addLog(`✓ Master Tersimpan di Drive!`, "text-green-400");
       } catch (e) { addLog(`✗ Error Master: ${e.message}`, "text-red-400"); }
 
-      // B. Split Files
+      // B. Split Files ke Drive
       for (let i = 0; i < selectedCats.length; i++) {
         const cat = selectedCats[i];
         loaderText.innerText = `Menyimpan Split: ${cat} (${i+1}/${selectedCats.length})...`;
-        addLog(`[${i+1}/${selectedCats.length}] Mengirim ${cat}...`, "text-blue-400");
+        addLog(`[${i+1}/${selectedCats.length}] Mengirim ${cat} ke Drive...`, "text-blue-400");
         await new Promise(r => setTimeout(r, 100));
 
         try {
@@ -417,20 +417,25 @@
 
       // C. Simpan Riwayat ke Spreadsheet & Local
       loaderText.innerText = "Merekam Riwayat ke Spreadsheet...";
-      addLog("Menyimpan rekap ke Google Spreadsheet...", "text-yellow-400");
+      addLog("Menyinkronkan rekap ke Google Spreadsheet...", "text-yellow-400");
       try {
-        await sendToGAS({ 
+        const resLog = await sendToGAS({ 
           action: 'saveLog', fileName: originalFileName, colName: colName, 
           totalCats: selectedCats.length, totalRows: globalData.length 
         });
-        saveToLocalHistory(originalFileName, colName, globalData.length, selectedCats.length);
-        addLog("✓ Riwayat sukses terekam di Spreadsheet!", "text-green-400 font-bold");
+        
+        if (resLog.status === 'success') {
+          saveToLocalHistory(originalFileName, colName, globalData.length, selectedCats.length);
+          addLog("✓ Riwayat sukses terekam di Spreadsheet Auto Sempurna!", "text-green-400 font-bold");
+        } else {
+           addLog(`✗ Spreadsheet Error: ${resLog.message}`, "text-red-400");
+        }
       } catch (e) { addLog(`✗ Gagal rekap riwayat: ${e.message}`, "text-red-400"); }
 
       loader.classList.remove('flex');
       loader.classList.add('hidden');
       addLog(`PROSES TUNTAS.`, "text-green-400 font-bold text-lg");
-      alert("Proses Selesai!\nData berhasil di-split, tersimpan di Drive, dan tercatat di Spreadsheet.");
+      alert("Proses Selesai!\nData berhasil di-split (Drive) dan tercatat di Spreadsheet.");
     });
   </script>
 </body>
