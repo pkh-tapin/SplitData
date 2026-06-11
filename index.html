@@ -43,10 +43,8 @@
 </head>
 <body class="min-h-screen flex flex-col items-center py-6 px-4">
 
-  <!-- Main Container -->
   <div class="w-full max-w-5xl glass-panel rounded-3xl shadow-[0_0_50px_rgba(107,70,193,0.15)] overflow-hidden transition-all relative z-10">
     
-    <!-- Navigation Tabs -->
     <div class="flex w-full bg-slate-800/60 border-b border-white/10 sticky top-0 z-20 overflow-x-auto no-scrollbar whitespace-nowrap shadow-md">
       <button onclick="switchTab('dashboard')" id="btn-dashboard" class="flex-1 min-w-[130px] py-4 text-sm font-semibold border-b-2 border-violet-500 text-white bg-white/5 transition-all">
         <i class="fas fa-chart-pie mr-2"></i> Dashboard
@@ -62,10 +60,8 @@
       </button>
     </div>
 
-    <!-- Content Area -->
     <div class="p-6 md:p-8">
 
-      <!-- TAB 1: DASHBOARD [LOCKED] -->
       <div id="tab-dashboard" class="tab-content active animate-fade-in">
         <h2 class="text-2xl font-bold text-white mb-6 text-center tracking-wide"><i class="fas fa-chart-bar text-violet-500 mr-2"></i>Statistik Database</h2>
         <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
@@ -88,7 +84,6 @@
         </div>
       </div>
 
-      <!-- TAB 2: SPLIT [LOCKED] -->
       <div id="tab-split" class="tab-content animate-fade-in">
         <h2 class="text-2xl font-bold text-white mb-6 text-center tracking-wide"><i class="fas fa-folder-tree text-violet-500 mr-2"></i>Arsip & Eksekusi Split</h2>
         <div class="mb-6">
@@ -119,7 +114,6 @@
         </button>
       </div>
 
-      <!-- TAB 3: DATABASE & RIWAYAT (MEMBACA GOOGLE SPREADSHEET) -->
       <div id="tab-database" class="tab-content animate-fade-in">
         <h2 class="text-2xl font-bold text-white mb-6 text-center tracking-wide"><i class="fas fa-database text-violet-500 mr-2"></i>Database & Riwayat</h2>
 
@@ -152,7 +146,6 @@
         </div>
       </div>
 
-      <!-- TAB 4: SYSTEM LOG [LOCKED] -->
       <div id="tab-log" class="tab-content animate-fade-in">
         <h2 class="text-2xl font-bold text-white mb-6 text-center tracking-wide"><i class="fas fa-terminal text-violet-500 mr-2"></i>Console Log</h2>
         <div id="logBox" class="bg-[#0a0f1d] border border-white/10 rounded-2xl p-5 font-mono text-xs md:text-sm h-[28rem] overflow-y-auto shadow-inner">
@@ -165,7 +158,6 @@
     </div>
   </div>
 
-  <!-- MODAL RINCIAN PER KATEGORI [LOCKED] -->
   <div id="detailModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-[100] hidden flex-col justify-center items-center px-4">
     <div class="bg-slate-800 border border-white/20 rounded-2xl w-full max-w-5xl max-h-[90vh] flex flex-col shadow-2xl animate-slide-up">
       <div class="p-5 border-b border-white/10 flex justify-between items-center bg-slate-900/50 rounded-t-2xl">
@@ -188,7 +180,6 @@
     </div>
   </div>
 
-  <!-- LOADING OVERLAY [LOCKED] -->
   <div id="loaderOverlay" class="fixed inset-0 bg-slate-900/90 backdrop-blur-md z-[100] hidden flex-col justify-center items-center px-4 animate-fade-in">
     <div class="relative w-24 h-24 mb-8">
       <div class="absolute inset-0 border-4 border-violet-500/20 rounded-full"></div>
@@ -264,7 +255,7 @@
     // Panggil saat aplikasi dimuat
     document.addEventListener("DOMContentLoaded", fetchHistoryFromSpreadsheet);
 
-    // --- UPLOAD & PARSE DATA [LOCKED] ---
+    // --- UPLOAD & PARSE DATA [MODIFIED] ---
     document.getElementById('fileUpload').addEventListener('change', function(e) {
       const file = e.target.files[0];
       if (!file) return;
@@ -286,28 +277,47 @@
           if (globalData.length > 0) {
             const headers = Object.keys(globalData[0]);
             const colSelect = document.getElementById('columnSelect');
-            colSelect.innerHTML = '';
             
+            // --- PERBAIKAN 1: Tambahkan opsi default kosong sebagai penahan ---
+            colSelect.innerHTML = '<option value="" disabled selected>-- Pilih Acuan Pemisah --</option>';
             headers.forEach(h => colSelect.appendChild(new Option(h, h)));
-            if (headers.includes('KAB_NAME')) colSelect.value = 'KAB_NAME';
             
+            // --- PERBAIKAN 2: Hanya tampilkan Step 2, tahan Step 3 & Tombol ---
             document.getElementById('step2').classList.remove('hidden');
-            document.getElementById('step3').classList.remove('hidden');
-            document.getElementById('processBtn').classList.remove('hidden');
-            document.getElementById('processBtn').classList.add('flex');
+            document.getElementById('step3').classList.add('hidden'); // Sembunyikan Step 3
+            document.getElementById('processBtn').classList.add('hidden'); // Sembunyikan Tombol
+            document.getElementById('processBtn').classList.remove('flex');
             
-            updateDashboard();
-            renderDataCards(); 
+            // --- PERBAIKAN 3: Siapkan Dashboard statis tanpa memproses kategori ---
+            document.getElementById('dashRows').innerText = globalData.length;
+            document.getElementById('dashCols').innerText = headers.length;
+            document.getElementById('dashCats').innerText = "0";
+            document.getElementById('rincianBox').innerHTML = '<p class="text-center text-slate-500 py-8">Silakan pilih acuan pemisah di tab Split.</p>';
+            document.getElementById('dbDataContainer').innerHTML = '<div class="col-span-full text-center text-slate-500 py-10 bg-slate-800/30 rounded-xl border border-white/5">Menunggu pemilihan acuan pemisah...</div>';
             
-            addLog(`Sukses membaca ${globalData.length} baris data.`, "text-green-400 font-bold");
-            switchTab('dashboard');
+            addLog(`Sukses membaca ${globalData.length} baris data. Menunggu instruksi pemisah.`, "text-green-400 font-bold");
           }
         } catch (err) { addLog(`Error parsing file: ${err.message}`, "text-red-400"); }
       };
       reader.readAsArrayBuffer(file);
     });
 
-    document.getElementById('columnSelect').addEventListener('change', () => { updateDashboard(); renderDataCards(); });
+    // --- PERBAIKAN 4: Trigger render data HANYA setelah acuan dipilih ---
+    document.getElementById('columnSelect').addEventListener('change', (e) => { 
+      if(e.target.value !== "") {
+        // Munculkan Step 3 dan Tombol Proses
+        document.getElementById('step3').classList.remove('hidden');
+        document.getElementById('processBtn').classList.remove('hidden');
+        document.getElementById('processBtn').classList.add('flex');
+        
+        // Render data sesuai acuan yang dipilih
+        updateDashboard(); 
+        renderDataCards(); 
+        
+        addLog(`Acuan pemisah dipilih: ${e.target.value}`, "text-blue-400");
+      }
+    });
+    
     document.getElementById('selectAll').addEventListener('change', e => { document.querySelectorAll('.cat-checkbox').forEach(cb => cb.checked = e.target.checked); });
 
     // --- DASHBOARD UPDATE [LOCKED] ---
