@@ -15,10 +15,14 @@
       theme: {
         extend: {
           colors: { slate: { 850: '#151e2e', 900: '#0f172a' } },
-          animation: { 'fade-in': 'fadeIn 0.4s ease-out forwards', 'slide-up': 'slideUp 0.4s ease-out forwards' },
+          animation: { 
+            'fade-in': 'fadeIn 0.3s ease-out forwards', 
+            'slide-up': 'slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+            'pulse-slow': 'pulse 3s infinite'
+          },
           keyframes: { 
-            fadeIn: { '0%': { opacity: '0', transform: 'translateY(10px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
-            slideUp: { '0%': { opacity: '0', transform: 'translateY(50px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } }
+            fadeIn: { '0%': { opacity: '0', transform: 'scale(0.98)' }, '100%': { opacity: '1', transform: 'scale(1)' } },
+            slideUp: { '0%': { opacity: '0', transform: 'translateY(30px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } }
           }
         }
       }
@@ -82,8 +86,8 @@
         </div>
         
         <div class="flex justify-between items-center mb-4">
-          <label class="font-semibold text-slate-300"><i class="fas fa-list-ul mr-2"></i>Rincian Kategori (Klik untuk Lihat Data Lengkap):</label>
-          <span class="text-xs text-slate-400 italic"><i class="fas fa-mouse-pointer mr-1"></i>Klik item untuk detail penuh & download</span>
+          <label class="font-semibold text-slate-300"><i class="fas fa-list-ul mr-2"></i>Rincian Kategori (Klik untuk Detail Data):</label>
+          <span class="text-xs text-slate-400 italic"><i class="fas fa-mouse-pointer mr-1"></i>Klik pada item untuk rincian & download</span>
         </div>
         <div id="rincianBox" class="bg-slate-800/50 rounded-2xl border border-white/5 p-4 max-h-96 overflow-y-auto space-y-2">
           <p class="text-center text-slate-500 py-8">Belum ada data diunggah.</p>
@@ -130,7 +134,7 @@
         <div id="step3" class="mb-6 animate-fade-in hidden">
           <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-3 mb-3">
             <label class="font-semibold text-slate-300 block">3. Pilih Kategori Target Split</label>
-            <input type="text" id="targetFilterInput" oninput="filterChecklistTree()" placeholder="Cari Provinsi / Kabupaten / Kategori..." class="bg-slate-900 border border-slate-700 text-white text-xs rounded-lg px-3 py-2 outline-none focus:ring-1 focus:ring-violet-500 w-full md:w-64">
+            <input type="text" id="targetFilterInput" oninput="filterChecklistTree()" placeholder="Cari wilayah/kategori..." class="bg-slate-900 border border-slate-700 text-white text-xs rounded-lg px-3 py-2 outline-none focus:ring-1 focus:ring-violet-500 w-full md:w-64">
           </div>
 
           <label class="flex items-center bg-slate-800/80 p-4 rounded-xl border border-violet-500/30 cursor-pointer mb-3">
@@ -140,7 +144,7 @@
           <div id="checklistContainer" class="bg-slate-800/50 rounded-xl border border-white/5 p-3 max-h-80 overflow-y-auto space-y-3"></div>
         </div>
 
-        <button id="processBtn" class="hidden w-full bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 text-white font-bold py-4 rounded-xl shadow-[0_0_20px_rgba(107,70,193,0.4)] transition-all flex justify-center items-center gap-3">
+        <button id="processBtn" class="hidden w-full bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 text-white font-bold py-4 rounded-xl shadow-[0_0_25px_rgba(107,70,193,0.4)] transition-all flex justify-center items-center gap-3">
           <i class="fas fa-rocket"></i> Proses & Sinkronisasi
         </button>
       </div>
@@ -167,7 +171,7 @@
         <div class="bg-slate-800/80 rounded-xl p-3 border border-white/5 mb-6">
           <div class="relative w-full">
             <i class="fas fa-search absolute left-4 top-3 text-slate-400"></i>
-            <input type="text" id="dbFilterVal" oninput="renderDataCards()" placeholder="Cari nama Provinsi / Kabupaten / Kecamatan / Kategori..." class="w-full bg-slate-900 border border-slate-700 text-white rounded-lg pl-10 pr-4 py-2 text-sm focus:ring-2 focus:ring-violet-500 outline-none">
+            <input type="text" id="dbFilterVal" oninput="renderDataCards()" placeholder="Cari nama wilayah / kategori..." class="w-full bg-slate-900 border border-slate-700 text-white rounded-lg pl-10 pr-4 py-2 text-sm focus:ring-2 focus:ring-violet-500 outline-none">
           </div>
         </div>
 
@@ -191,8 +195,8 @@
     </div>
   </div>
 
-  <!-- MODAL DETAIL DATA LENGKAP -->
-  <div id="detailModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-[100] hidden flex-col justify-center items-center px-4">
+  <!-- MODAL DETAIL DATA LENGKAP & TERPERINCI -->
+  <div id="detailModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[100] hidden flex-col justify-center items-center px-4">
     <div class="bg-slate-800 border border-white/20 rounded-2xl w-full max-w-6xl max-h-[92vh] flex flex-col shadow-2xl animate-slide-up">
       
       <!-- HEADER MODAL -->
@@ -209,25 +213,25 @@
       <!-- BODY MODAL -->
       <div class="p-6 overflow-y-auto flex-1 custom-scrollbar space-y-6">
         
-        <!-- RINGKASAN REKAP LENGKAP MULTI-STATISTIK -->
+        <!-- RINGKASAN REKAP DEMOGRAFI WILAYAH (MISAL TAPIN 10, HSS 10) -->
         <div>
           <h4 class="text-sm font-bold text-slate-300 mb-3 border-b border-white/5 pb-2 flex items-center justify-between">
-            <span><i class="fas fa-chart-pie mr-2 text-violet-400"></i>Ringkasan Demografi Data</span>
-            <span id="modalStatBadge" class="text-xs bg-violet-500/20 text-violet-300 px-2 py-0.5 rounded font-mono"></span>
+            <span><i class="fas fa-chart-pie mr-2 text-violet-400"></i>Ringkasan Rincian Wilayah & Demografi</span>
+            <span id="modalStatBadge" class="text-xs bg-violet-500/20 text-violet-300 px-2.5 py-1 rounded-full font-mono font-bold"></span>
           </h4>
           <div id="modalBreakdownContainer" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
         </div>
 
-        <!-- SEARCH BAR & TOTAL BARIS PREVIEW -->
+        <!-- SEARCH BAR & TOTAL BARIS PREVIEW LENGKAP -->
         <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-3 border-b border-white/5 pb-3">
           <h4 class="text-sm font-bold text-slate-300 flex items-center">
-            <i class="fas fa-table mr-2 text-violet-400"></i>Preview Seluruh Baris Data (<span id="modalRowCountLabel" class="text-violet-300">0</span>)
+            <i class="fas fa-table mr-2 text-violet-400"></i>Rincian Baris Data Lengkap (<span id="modalRowCountLabel" class="text-violet-300 font-mono">0</span>)
           </h4>
-          <input type="text" id="modalSearchInput" oninput="filterModalTable()" placeholder="Cari di dalam tabel rincian ini..." class="bg-slate-900 border border-slate-700 text-white text-xs rounded-lg px-3 py-2 outline-none focus:ring-1 focus:ring-violet-500 w-full md:w-64">
+          <input type="text" id="modalSearchInput" oninput="filterModalTable()" placeholder="Cari di dalam rincian ini..." class="bg-slate-900 border border-slate-700 text-white text-xs rounded-lg px-3 py-2 outline-none focus:ring-1 focus:ring-violet-500 w-full md:w-64">
         </div>
 
-        <!-- TABEL DATA LENGKAP -->
-        <div class="overflow-x-auto rounded-xl border border-white/10 bg-slate-900/40 max-h-[350px] overflow-y-auto">
+        <!-- TABEL DATA LENGKAP 100% TANPA PEMOTONGAN -->
+        <div class="overflow-x-auto rounded-xl border border-white/10 bg-slate-900/40 max-h-[380px] overflow-y-auto">
           <table class="w-full text-xs text-left text-slate-300">
             <thead id="modalTableHead" class="text-[11px] text-slate-400 uppercase bg-slate-900/90 sticky top-0 z-10 whitespace-nowrap"></thead>
             <tbody id="modalTableBody" class="divide-y divide-white/5 whitespace-nowrap"></tbody>
@@ -238,19 +242,75 @@
     </div>
   </div>
 
-  <!-- LOADER OVERLAY -->
-  <div id="loaderOverlay" class="fixed inset-0 bg-slate-900/90 backdrop-blur-md z-[100] hidden flex-col justify-center items-center px-4 animate-fade-in">
-    <div class="relative w-24 h-24 mb-8">
+  <!-- LOADER OVERLAY MODERN BERANIMASI -->
+  <div id="loaderOverlay" class="fixed inset-0 bg-slate-950/90 backdrop-blur-lg z-[110] hidden flex-col justify-center items-center px-4 animate-fade-in">
+    <div class="relative w-28 h-28 mb-8 flex items-center justify-center">
       <div class="absolute inset-0 border-4 border-violet-500/20 rounded-full"></div>
-      <div class="absolute inset-0 border-4 border-violet-500 rounded-full border-t-transparent animate-spin"></div>
-      <div class="absolute inset-0 flex items-center justify-center"><i class="fas fa-cloud text-2xl text-indigo-400 animate-pulse"></i></div>
+      <div class="absolute inset-0 border-4 border-gradient to-violet-500 border-violet-500 rounded-full border-t-transparent animate-spin"></div>
+      <div class="w-16 h-16 bg-violet-600/20 rounded-full flex items-center justify-center animate-pulse">
+        <i class="fas fa-rocket text-3xl text-violet-400"></i>
+      </div>
     </div>
-    <h3 class="text-2xl font-bold text-white mb-2 text-center" id="loaderTitle">Memproses & Sinkronisasi...</h3>
-    <p class="text-indigo-400 font-medium text-center text-lg" id="loaderText">Menyiapkan koneksi API...</p>
+    <h3 class="text-2xl font-black text-white mb-2 text-center tracking-wide" id="loaderTitle">Memproses & Sinkronisasi...</h3>
+    <p class="text-indigo-300 font-medium text-center text-sm md:text-base mb-4" id="loaderText">Menyiapkan koneksi API...</p>
+    
+    <!-- PROGRESS BAR ANIMATED -->
+    <div class="w-full max-w-md bg-slate-800 rounded-full h-2 overflow-hidden border border-white/10 mb-3">
+      <div id="loaderProgressBar" class="bg-gradient-to-r from-violet-500 via-indigo-500 to-teal-400 h-full w-0 transition-all duration-300"></div>
+    </div>
+  </div>
+
+  <!-- CUSTOM ALERT / NOTIFIKASI MODAL MODERN (REPLACING NATIVE ALERT) -->
+  <div id="customAlertModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[120] hidden flex justify-center items-center px-4 animate-fade-in">
+    <div class="bg-slate-800 border border-violet-500/30 rounded-3xl p-6 md:p-8 max-w-md w-full text-center shadow-[0_0_50px_rgba(139,92,246,0.3)] transform transition-all animate-slide-up">
+      <div id="customAlertIcon" class="w-20 h-20 bg-gradient-to-tr from-emerald-500 to-teal-400 rounded-full flex items-center justify-center mx-auto mb-5 shadow-lg shadow-emerald-500/30">
+        <i class="fas fa-check text-3xl text-white"></i>
+      </div>
+      <h3 id="customAlertTitle" class="text-2xl font-black text-white mb-2">Proses Selesai!</h3>
+      <p id="customAlertMsg" class="text-slate-300 text-sm leading-relaxed mb-6"></p>
+      <button onclick="closeCustomAlert()" class="w-full bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-violet-500/25 transition-all">
+        <i class="fas fa-check-circle mr-2"></i> Mengerti
+      </button>
+    </div>
   </div>
 
   <!-- SCRIPT LOGIKA UTAMA -->
   <script>
+    // --- HELPER: PEMBERSIH NAMA OTOMATIS (FORMAT CLEAN NAME) ---
+    function cleanName(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/\b(KABUPATEN|KAB\.|KAB|KOTA|PROVINSI|PROV\.)\b/gi, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+    }
+
+    // --- CUSTOM MODERN NOTIFICATION SYSTEM ---
+    function showModernAlert(title, message, isSuccess = true) {
+      const modal = document.getElementById('customAlertModal');
+      const icon = document.getElementById('customAlertIcon');
+      
+      document.getElementById('customAlertTitle').innerText = title;
+      document.getElementById('customAlertMsg').innerText = message;
+
+      if(isSuccess) {
+        icon.className = "w-20 h-20 bg-gradient-to-tr from-emerald-500 to-teal-400 rounded-full flex items-center justify-center mx-auto mb-5 shadow-lg shadow-emerald-500/30 animate-bounce";
+        icon.innerHTML = `<i class="fas fa-check text-3xl text-white"></i>`;
+      } else {
+        icon.className = "w-20 h-20 bg-gradient-to-tr from-rose-500 to-amber-500 rounded-full flex items-center justify-center mx-auto mb-5 shadow-lg shadow-rose-500/30";
+        icon.innerHTML = `<i class="fas fa-exclamation-triangle text-3xl text-white"></i>`;
+      }
+
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeCustomAlert() {
+      const modal = document.getElementById('customAlertModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
     // --- NAVIGATION TAB LOGIC ---
     function switchTab(tabId) {
       document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
@@ -280,7 +340,7 @@
       logBox.scrollTop = logBox.scrollHeight;
     }
 
-    // --- LOGIKA MULTI COLUMN KEY GENERATOR ---
+    // --- LOGIKA MULTI COLUMN KEY GENERATOR DENGAN BERSIH NAMA ---
     function getSelectedColumns() {
       const c1 = document.getElementById('columnSelect').value;
       const c2 = document.getElementById('columnSelect2').value;
@@ -291,7 +351,7 @@
     function getRowGroupKey(row) {
       const cols = getSelectedColumns();
       if (cols.length === 0) return "Uncategorized";
-      return cols.map(c => row[c] || "N/A").join(" - ");
+      return cols.map(c => cleanName(row[c]) || "N/A").join(" - ");
     }
 
     // --- FETCH HISTORY FROM SPREADSHEET ---
@@ -314,7 +374,7 @@
             const driveHtml = safeFolder ? `<a href="${safeFolder}" target="_blank" onclick="event.stopPropagation()" class="text-xs text-violet-400 hover:text-violet-300 font-bold"><i class="fas fa-folder-open mr-1"></i>Drive</a>` : '';
             
             const safeDate = String(item.date).replace(/"/g, '&quot;');
-            const safeName = String(item.fileName).replace(/"/g, '&quot;');
+            const safeName = cleanName(item.fileName).replace(/"/g, '&quot;');
             const safeColName = String(item.colName).replace(/"/g, '&quot;');
             
             htmlString += `
@@ -350,8 +410,11 @@
     }
 
     function showHistoryDetail(date, fileName, colName, totalCats, totalRows, folderUrl) {
-      const driveMsg = folderUrl ? '\n\nLink Folder Drive: ' + folderUrl : '';
-      alert(`📌 DETAIL RIWAYAT EKSEKUSI:\n\n• Tanggal: ${date}\n• File Master: ${fileName}\n• Acuan Pemisah: ${colName}\n• Total Kategori File: ${totalCats}\n• Total Baris Data: ${totalRows}${driveMsg}`);
+      const driveMsg = folderUrl ? `\n\nLink Folder Drive:\n${folderUrl}` : '';
+      showModernAlert(
+        "Detail Riwayat Eksekusi",
+        `• Tanggal: ${date}\n• File Master: ${fileName}\n• Acuan Pemisah: ${colName}\n• Total Kategori: ${totalCats} File\n• Total Baris Data: ${totalRows} Baris${driveMsg}`
+      );
     }
 
     document.addEventListener("DOMContentLoaded", fetchHistoryFromSpreadsheet);
@@ -474,7 +537,6 @@
       const cols = getSelectedColumns();
       if(cols.length === 0) return;
 
-      // Kelompokkan berdasarkan Level 1
       const groupedByL1 = {};
       Object.keys(countMap).sort().forEach(catKey => {
         const parts = catKey.split(" - ");
@@ -483,7 +545,7 @@
         groupedByL1[l1Val].push({ fullKey: catKey, count: countMap[catKey] });
       });
 
-      Object.keys(groupedByL1).sort().forEach((l1Name, idx) => {
+      Object.keys(groupedByL1).sort().forEach((l1Name) => {
         const items = groupedByL1[l1Name];
         const groupTotalRows = items.reduce((sum, item) => sum + item.count, 0);
 
@@ -572,14 +634,14 @@
            </div>
            <div class="flex justify-between items-center border-t border-white/5 pt-3">
              <span class="bg-violet-500/20 text-violet-300 px-3 py-1 rounded-full text-xs font-bold">${count} Baris Data</span>
-             <span class="text-xs text-slate-400 group-hover:text-white transition-colors">Lihat Detail Lengkap <i class="fas fa-arrow-right ml-1"></i></span>
+             <span class="text-xs text-slate-400 group-hover:text-white transition-colors">Lihat Rincian <i class="fas fa-arrow-right ml-1"></i></span>
            </div>
          </div>`;
       });
       container.innerHTML = htmlString;
     }
 
-    // --- OPEN MODAL RINCIAN 100% LENGKAP ---
+    // --- OPEN MODAL RINCIAN TERPERINCI LENGKAP ---
     function openModal(category) {
       currentModalCatName = category;
       currentModalData = globalData.filter(r => getRowGroupKey(r) === category);
@@ -597,10 +659,7 @@
       document.getElementById('modalStatBadge').innerText = `Total ${currentModalData.length} Baris Data`;
       document.getElementById('modalSearchInput').value = "";
 
-      // Dapatkan statistik breakdown untuk 3 kolom penting turunan yang unik
       renderModalMultiBreakdown(currentModalData, headers);
-
-      // Render Tabel Lengkap Tanpa Pemotongan Baris
       renderModalTableRows(currentModalData, headers);
 
       const modal = document.getElementById('detailModal');
@@ -608,16 +667,15 @@
       modal.classList.add('flex');
     }
 
-    // Breakdown statistik otomatis untuk beberapa kolom turunan sekaligus
+    // Breakdown statistik terperinci (misal Tapin 10, HSS 10)
     function renderModalMultiBreakdown(data, headers) {
       const selectedCols = getSelectedColumns();
       const availableCols = headers.filter(h => !selectedCols.includes(h));
 
-      // Cari kolom yang memiliki variasi data (misal Kecamatan, Kelurahan, Status)
       const targetBreakdownCols = [];
       for (const col of availableCols) {
-        const uniqueVals = new Set(data.map(d => d[col]));
-        if (uniqueVals.size > 1 && uniqueVals.size <= 50) {
+        const uniqueVals = new Set(data.map(d => cleanName(d[col])));
+        if (uniqueVals.size >= 1 && uniqueVals.size <= 50) {
           targetBreakdownCols.push(col);
           if (targetBreakdownCols.length >= 3) break;
         }
@@ -633,47 +691,43 @@
       targetBreakdownCols.forEach(col => {
         const counts = {};
         data.forEach(r => {
-          const val = r[col] || "Kosong";
+          const val = cleanName(r[col]) || "Kosong";
           counts[val] = (counts[val] || 0) + 1;
         });
 
         const card = document.createElement('div');
-        card.className = "bg-slate-900/80 p-3 rounded-xl border border-white/10 shadow-inner";
+        card.className = "bg-slate-900/80 p-3.5 rounded-xl border border-white/10 shadow-inner";
         
-        let listHtml = Object.keys(counts).sort().slice(0, 8).map(k => `
-          <div class="flex justify-between items-center text-xs py-1 border-b border-white/5 last:border-0">
+        let listHtml = Object.keys(counts).sort().map(k => `
+          <div class="flex justify-between items-center text-xs py-1.5 border-b border-white/5 last:border-0">
             <span class="text-slate-300 truncate pr-2 font-medium" title="${k}">${k}</span>
-            <span class="text-violet-400 font-bold bg-violet-500/10 px-2 py-0.5 rounded text-[11px]">${counts[k]}</span>
+            <span class="text-violet-300 font-bold bg-violet-500/20 px-2 py-0.5 rounded text-[11px]">${counts[k]} Data</span>
           </div>
         `).join('');
 
-        if(Object.keys(counts).length > 8) {
-          listHtml += `<div class="text-[10px] text-slate-500 italic text-center pt-1">+ ${Object.keys(counts).length - 8} nilai lainnya...</div>`;
-        }
-
         card.innerHTML = `
           <div class="text-xs font-bold text-violet-300 border-b border-white/10 pb-2 mb-2 flex justify-between">
-            <span><i class="fas fa-sitemap mr-1"></i>Per ${col}</span>
+            <span><i class="fas fa-sitemap mr-1"></i>Rincian ${col}</span>
             <span class="text-slate-400 font-normal">${Object.keys(counts).length} Variasi</span>
           </div>
-          <div class="space-y-0.5 max-h-36 overflow-y-auto pr-1">${listHtml}</div>
+          <div class="space-y-0.5 max-h-40 overflow-y-auto pr-1">${listHtml}</div>
         `;
 
         container.appendChild(card);
       });
     }
 
-    // Render tabel data lengkap tanpa dibatasi 100 baris
+    // Render tabel data lengkap tanpa pemotongan
     function renderModalTableRows(data, headers) {
-      document.getElementById('modalRowCountLabel').innerText = `${data.length} Baris`;
+      document.getElementById('modalRowCountLabel').innerText = `${data.length} Baris Data (1 - ${data.length})`;
 
-      let thHtml = "";
+      let thHtml = `<th class="px-3 py-3 border-b border-white/10 text-center w-12">No</th>`;
       headers.forEach(h => { thHtml += `<th class="px-4 py-3 border-b border-white/10">${h}</th>`; });
       document.getElementById('modalTableHead').innerHTML = `<tr>${thHtml}</tr>`;
 
       let tbHtml = "";
-      data.forEach(r => {
-        let tdHtml = "";
+      data.forEach((r, idx) => {
+        let tdHtml = `<td class="px-3 py-2 border-b border-white/5 text-center font-mono text-slate-500">${idx + 1}</td>`;
         headers.forEach(h => {
           const displayVal = r[h] !== undefined && r[h] !== "" ? r[h] : '-';
           const safeTitle = String(r[h] || '').replace(/"/g, '&quot;');
@@ -685,7 +739,6 @@
       document.getElementById('modalTableBody').innerHTML = tbHtml;
     }
 
-    // Filter langsung di dalam modal
     function filterModalTable() {
       const filter = document.getElementById('modalSearchInput').value.toLowerCase();
       if (!filter) {
@@ -702,7 +755,7 @@
     // --- DOWNLOAD EXCEL LANGSUNG DARI MODAL ---
     function downloadCurrentModalData() {
       const dataToExport = currentModalFilteredData.length > 0 ? currentModalFilteredData : currentModalData;
-      if(!dataToExport || dataToExport.length === 0) return alert("Tidak ada data untuk diunduh!");
+      if(!dataToExport || dataToExport.length === 0) return showModernAlert("Peringatan", "Tidak ada data untuk diunduh!", false);
       
       const ws = XLSX.utils.json_to_sheet(dataToExport);
       applyNeatExcelFormat(ws, dataToExport);
@@ -741,20 +794,23 @@
       ws['!autofilter'] = { ref: XLSX.utils.encode_range(range) };
     }
 
-    // --- PROSES & UPLOAD DRIVE / SPREADSHEET ---
+    // --- PROSES & UPLOAD DRIVE / SPREADSHEET (DENGAN PROGRESS ANIMASI & NOTIF MODERN) ---
     document.getElementById('processBtn').addEventListener('click', async function() {
       const selectedCols = getSelectedColumns();
       const selectedCats = Array.from(document.querySelectorAll('.cat-checkbox:checked')).map(cb => cb.value);
 
-      if (selectedCats.length === 0) return alert("Centang minimal satu kategori!");
+      if (selectedCats.length === 0) return showModernAlert("Perhatian", "Centang minimal satu kategori target!", false);
 
       const loader = document.getElementById('loaderOverlay');
       const loaderText = document.getElementById('loaderText');
+      const progressBar = document.getElementById('loaderProgressBar');
+      
+      progressBar.style.width = '5%';
       loader.classList.remove('hidden');
       loader.classList.add('flex');
       switchTab('log');
 
-      const masterFolderName = originalFileName;
+      const masterFolderName = cleanName(originalFileName);
       const colLabelStr = selectedCols.join(' -> ');
       addLog(`MEMULAI PROSES: Split (${colLabelStr}) & Sinkronisasi Drive/Spreadsheet`, "text-yellow-400 font-bold");
 
@@ -773,7 +829,9 @@
 
       // A. Master File
       loaderText.innerText = "Membentuk File Master Keseluruhan...";
+      progressBar.style.width = '15%';
       await new Promise(r => setTimeout(r, 100));
+      
       try {
         const wsMaster = XLSX.utils.json_to_sheet(globalData);
         applyNeatExcelFormat(wsMaster, globalData); 
@@ -782,7 +840,7 @@
         XLSX.utils.book_append_sheet(wbMaster, wsMaster, "Master Data");
         const b64Master = XLSX.write(wbMaster, { bookType: 'xlsx', type: 'base64' });
         
-        const res = await sendToGAS({ action: 'saveExcel', base64Data: b64Master, fileName: `[MASTER ALL DATA] ${originalFileName}.xlsx`, subFolderName: masterFolderName });
+        const res = await sendToGAS({ action: 'saveExcel', base64Data: b64Master, fileName: `[MASTER ALL DATA] ${masterFolderName}.xlsx`, subFolderName: masterFolderName });
         if(res.status === 'success') {
           createdFolderUrl = res.folderUrl || "";
           addLog(`✓ Master Rapi Tersimpan di Drive!`, "text-green-400");
@@ -790,11 +848,15 @@
       } catch (e) { addLog(`✗ Error Master: ${e.message}`, "text-red-400"); }
 
       // B. Split Files
+      const totalSteps = selectedCats.length;
       for (let i = 0; i < selectedCats.length; i++) {
         const cat = selectedCats[i];
+        const percent = Math.round(15 + ((i + 1) / totalSteps) * 70);
+        
+        progressBar.style.width = `${percent}%`;
         loaderText.innerText = `Menyimpan Split: ${cat} (${i+1}/${selectedCats.length})...`;
         addLog(`[${i+1}/${selectedCats.length}] Mengirim ${cat} ke Drive...`, "text-blue-400");
-        await new Promise(r => setTimeout(r, 100));
+        await new Promise(r => setTimeout(r, 80));
 
         try {
           const filteredData = globalData.filter(r => getRowGroupKey(r) === cat);
@@ -807,7 +869,7 @@
           XLSX.utils.book_append_sheet(wb, ws, "Data");
           const b64Str = XLSX.write(wb, { bookType: 'xlsx', type: 'base64' });
 
-          const res = await sendToGAS({ action: 'saveExcel', base64Data: b64Str, fileName: `${safeCatName} - ${originalFileName}.xlsx`, subFolderName: masterFolderName });
+          const res = await sendToGAS({ action: 'saveExcel', base64Data: b64Str, fileName: `${safeCatName} - ${masterFolderName}.xlsx`, subFolderName: masterFolderName });
           if(res.status === 'success') {
             if(!createdFolderUrl) createdFolderUrl = res.folderUrl || "";
             addLog(`✓ Sukses: ${cat}`, "text-green-400");
@@ -816,12 +878,14 @@
       }
 
       // C. Simpan Riwayat ke Spreadsheet
+      progressBar.style.width = '95%';
       loaderText.innerText = "Merekam Riwayat ke Spreadsheet...";
       addLog("Menyinkronkan rekap ke Google Spreadsheet...", "text-yellow-400");
+      
       try {
         const resLog = await sendToGAS({ 
           action: 'saveLog', 
-          fileName: originalFileName, 
+          fileName: masterFolderName, 
           colName: colLabelStr, 
           totalCats: selectedCats.length, 
           totalRows: globalData.length,
@@ -833,10 +897,18 @@
         } else addLog(`✗ Spreadsheet Error: ${resLog.message}`, "text-red-400");
       } catch (e) { addLog(`✗ Gagal rekap riwayat: ${e.message}`, "text-red-400"); }
 
+      progressBar.style.width = '100%';
+      await new Promise(r => setTimeout(r, 200));
+
       loader.classList.remove('flex');
       loader.classList.add('hidden');
       addLog(`PROSES TUNTAS.`, "text-green-400 font-bold text-lg");
-      alert("Proses Selesai!\nData berhasil di-split secara rapi (Drive) dan tercatat di Spreadsheet.");
+
+      // TAMPILKAN NOTIFIKASI MODERN SELESAI
+      showModernAlert(
+        "Proses Split Berhasil!", 
+        `Data (${masterFolderName}) telah berhasil di-split sebanyak ${selectedCats.length} file kategori secara rapi ke Google Drive dan tercatat di Spreadsheet.`
+      );
     });
   </script>
 </body>
