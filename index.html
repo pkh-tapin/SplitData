@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-  <title>Agenda Split Data Enterprise</title>
+  <title>Agenda Split Data Enterprise - Advanced Multi-Category</title>
   
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
@@ -24,7 +24,7 @@
       }
     }
 
-    // [BLUEPRINT LOCKED] 🔴 GANTI DENGAN URL WEB APP GOOGLE APPS SCRIPT ANDA
+    // [BLUEPRINT LOCKED] 🔴 URL WEB APP GOOGLE APPS SCRIPT ANDA
     const GAS_API_URL = "https://script.google.com/macros/s/AKfycbw5bQE3OyQ8LE64Vdu3XgP3kBEmRAJtyajI9L21uY6bxYa9hvpbrENEJiItF6IBoA6YxQ/exec";
   </script>
 
@@ -62,6 +62,7 @@
 
     <div class="p-6 md:p-8">
 
+      <!-- TAB 1: DASHBOARD -->
       <div id="tab-dashboard" class="tab-content active animate-fade-in">
         <h2 class="text-2xl font-bold text-white mb-6 text-center tracking-wide"><i class="fas fa-chart-bar text-violet-500 mr-2"></i>Statistik Database</h2>
         <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
@@ -78,14 +79,16 @@
             <div class="text-xs font-bold text-slate-400 uppercase tracking-widest">Total Kolom</div>
           </div>
         </div>
-        <label class="font-semibold text-slate-300 mb-4 block"><i class="fas fa-list-ul mr-2"></i>Rincian Kategori:</label>
+        <label class="font-semibold text-slate-300 mb-4 block"><i class="fas fa-list-ul mr-2"></i>Rincian Kategori (Terurut Abjad):</label>
         <div id="rincianBox" class="bg-slate-800/50 rounded-2xl border border-white/5 p-4 max-h-72 overflow-y-auto">
           <p class="text-center text-slate-500 py-8">Belum ada data diunggah.</p>
         </div>
       </div>
 
+      <!-- TAB 2: SPLIT DATA -->
       <div id="tab-split" class="tab-content animate-fade-in">
-        <h2 class="text-2xl font-bold text-white mb-6 text-center tracking-wide"><i class="fas fa-folder-tree text-violet-500 mr-2"></i>Arsip & Eksekusi Split</h2>
+        <h2 class="text-2xl font-bold text-white mb-6 text-center tracking-wide"><i class="fas fa-folder-tree text-violet-500 mr-2"></i>Arsip & Eksekusi Split Multi-Kategori</h2>
+        
         <div class="mb-6">
           <label class="font-semibold text-slate-300 mb-3 block">1. Upload Database (Excel Mentah)</label>
           <div class="relative">
@@ -97,23 +100,40 @@
           </div>
           <p id="fileInfoLabel" class="text-violet-400 font-bold mt-2 text-sm hidden"></p>
         </div>
+
         <div id="step2" class="mb-6 animate-fade-in hidden">
-          <label class="font-semibold text-slate-300 mb-3 block">2. Pilih Acuan Pemisah</label>
-          <select id="columnSelect" class="w-full bg-slate-800 border border-slate-600 text-white rounded-xl p-4 focus:ring-2 focus:ring-violet-500 outline-none appearance-none"></select>
+          <label class="font-semibold text-slate-300 mb-3 block">2. Pilih Acuan Pemisah (Bisa 1-3 Kategori Hierarki)</label>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div>
+              <span class="text-xs text-slate-400 mb-1 block">Kolom Acuan 1 (Utama - misal: Provinsi)</span>
+              <select id="columnSelect1" onchange="handleColumnChange()" class="w-full bg-slate-800 border border-slate-600 text-white rounded-xl p-3 focus:ring-2 focus:ring-violet-500 outline-none text-sm"></select>
+            </div>
+            <div>
+              <span class="text-xs text-slate-400 mb-1 block">Kolom Acuan 2 (Opsional - misal: Kabupaten)</span>
+              <select id="columnSelect2" onchange="handleColumnChange()" class="w-full bg-slate-800 border border-slate-600 text-white rounded-xl p-3 focus:ring-2 focus:ring-violet-500 outline-none text-sm"></select>
+            </div>
+            <div>
+              <span class="text-xs text-slate-400 mb-1 block">Kolom Acuan 3 (Opsional - misal: Kecamatan)</span>
+              <select id="columnSelect3" onchange="handleColumnChange()" class="w-full bg-slate-800 border border-slate-600 text-white rounded-xl p-3 focus:ring-2 focus:ring-violet-500 outline-none text-sm"></select>
+            </div>
+          </div>
         </div>
+
         <div id="step3" class="mb-6 animate-fade-in hidden">
-          <label class="font-semibold text-slate-300 mb-3 block">3. Pilih Kategori Target</label>
+          <label class="font-semibold text-slate-300 mb-3 block">3. Pilih Hasil Kategori Target (Terurut Abjad)</label>
           <label class="flex items-center bg-slate-800/80 p-4 rounded-xl border border-violet-500/30 cursor-pointer mb-3">
             <input type="checkbox" id="selectAll" checked class="w-5 h-5 accent-violet-500 mr-3" />
             <span class="font-bold text-white">Pilih Semua Kategori</span>
           </label>
           <div id="checklistContainer" class="bg-slate-800/50 rounded-xl border border-white/5 p-2 max-h-60 overflow-y-auto"></div>
         </div>
+
         <button id="processBtn" class="hidden w-full bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 text-white font-bold py-4 rounded-xl shadow-[0_0_20px_rgba(107,70,193,0.4)] transition-all flex justify-center items-center gap-3">
           <i class="fas fa-rocket"></i> Proses & Sinkronisasi
         </button>
       </div>
 
+      <!-- TAB 3: DATABASE -->
       <div id="tab-database" class="tab-content animate-fade-in">
         <h2 class="text-2xl font-bold text-white mb-6 text-center tracking-wide"><i class="fas fa-database text-violet-500 mr-2"></i>Database & Riwayat</h2>
 
@@ -128,14 +148,14 @@
         <hr class="border-white/10 mb-6">
 
         <div class="flex flex-col md:flex-row md:justify-between md:items-end mb-4 gap-2">
-          <label class="font-semibold text-slate-300 block"><i class="fas fa-th-large mr-2"></i>Rincian Data Aktif (Card View)</label>
+          <label class="font-semibold text-slate-300 block"><i class="fas fa-th-large mr-2"></i>Rincian Data Aktif (Card View - Terurut Abjad)</label>
           <span id="dataCountLabel" class="text-xs font-bold bg-violet-500/20 text-violet-300 px-3 py-1 rounded-full w-fit">0 Kategori</span>
         </div>
 
         <div class="bg-slate-800/80 rounded-xl p-3 border border-white/5 mb-6">
           <div class="relative w-full">
             <i class="fas fa-search absolute left-4 top-3 text-slate-400"></i>
-            <input type="text" id="dbFilterVal" oninput="renderDataCards()" placeholder="Cari nama Kabupaten/Kategori..." class="w-full bg-slate-900 border border-slate-700 text-white rounded-lg pl-10 pr-4 py-2 text-sm focus:ring-2 focus:ring-violet-500 outline-none">
+            <input type="text" id="dbFilterVal" oninput="renderDataCards()" placeholder="Cari nama Provinsi / Kabupaten / Kategori..." class="w-full bg-slate-900 border border-slate-700 text-white rounded-lg pl-10 pr-4 py-2 text-sm focus:ring-2 focus:ring-violet-500 outline-none">
           </div>
         </div>
 
@@ -146,6 +166,7 @@
         </div>
       </div>
 
+      <!-- TAB 4: CONSOLE LOG -->
       <div id="tab-log" class="tab-content animate-fade-in">
         <h2 class="text-2xl font-bold text-white mb-6 text-center tracking-wide"><i class="fas fa-terminal text-violet-500 mr-2"></i>Console Log</h2>
         <div id="logBox" class="bg-[#0a0f1d] border border-white/10 rounded-2xl p-5 font-mono text-xs md:text-sm h-[28rem] overflow-y-auto shadow-inner">
@@ -158,6 +179,7 @@
     </div>
   </div>
 
+  <!-- MODAL DETAIL & PIVOT -->
   <div id="detailModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-[100] hidden flex-col justify-center items-center px-4">
     <div class="bg-slate-800 border border-white/20 rounded-2xl w-full max-w-5xl max-h-[90vh] flex flex-col shadow-2xl animate-slide-up">
       <div class="p-5 border-b border-white/10 flex justify-between items-center bg-slate-900/50 rounded-t-2xl">
@@ -165,10 +187,17 @@
         <button onclick="closeModal()" class="text-slate-400 hover:text-white transition-colors"><i class="fas fa-times text-2xl"></i></button>
       </div>
       <div class="p-6 overflow-y-auto flex-1 custom-scrollbar">
+        
         <div class="mb-6">
-          <h4 id="modalBreakdownTitle" class="text-sm font-bold text-slate-300 mb-3 border-b border-white/5 pb-2"></h4>
+          <div class="flex justify-between items-center mb-3 border-b border-white/5 pb-2">
+            <h4 id="modalBreakdownTitle" class="text-sm font-bold text-slate-300"></h4>
+            <button id="modalDownloadBtn" class="text-xs bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3 py-1.5 rounded-lg shadow transition-all flex items-center gap-1">
+              <i class="fas fa-file-excel"></i> Download Excel
+            </button>
+          </div>
           <div id="modalBreakdown" class="grid grid-cols-2 md:grid-cols-4 gap-3"></div>
         </div>
+
         <h4 class="text-sm font-bold text-slate-300 mb-3 border-b border-white/5 pb-2"><i class="fas fa-table mr-2"></i>Preview Tabel Baris Data</h4>
         <div class="overflow-x-auto rounded-xl border border-white/10 bg-slate-900/30">
           <table class="w-full text-xs text-left text-slate-300">
@@ -180,6 +209,7 @@
     </div>
   </div>
 
+  <!-- LOADER OVERLAY -->
   <div id="loaderOverlay" class="fixed inset-0 bg-slate-900/90 backdrop-blur-md z-[100] hidden flex-col justify-center items-center px-4 animate-fade-in">
     <div class="relative w-24 h-24 mb-8">
       <div class="absolute inset-0 border-4 border-violet-500/20 rounded-full"></div>
@@ -217,7 +247,7 @@
       logBox.scrollTop = logBox.scrollHeight;
     }
 
-    // --- FITUR BARU: MEMBACA RIWAYAT SPREADSHEET VIA API GAS ---
+    // --- MEMBACA RIWAYAT SPREADSHEET VIA API GAS ---
     async function fetchHistoryFromSpreadsheet() {
       const container = document.getElementById('historyContainer');
       container.innerHTML = '<p class="text-slate-500 italic text-sm"><i class="fas fa-spinner fa-spin mr-2"></i>Mengambil data dari Spreadsheet...</p>';
@@ -229,7 +259,6 @@
         const result = await res.json();
         
         if (result.status === 'success' && result.data && result.data.length > 0) {
-          // Balik urutan agar yang terbaru di atas, dan batasi 15 terakhir
           const historyData = result.data.reverse().slice(0, 15);
           container.innerHTML = historyData.map(item => `
             <div class="min-w-[280px] bg-slate-800 border border-white/10 p-4 rounded-2xl shadow-lg flex-shrink-0 animate-fade-in">
@@ -248,14 +277,13 @@
           container.innerHTML = '<p class="text-slate-500 italic text-sm">Spreadsheet aktif, namun belum ada riwayat tersimpan.</p>';
         }
       } catch (error) {
-        container.innerHTML = `<p class="text-red-400 italic text-sm">Gagal memuat riwayat: Pastikan URL GAS benar dan sudah di-Deploy versi baru.</p>`;
+        container.innerHTML = `<p class="text-red-400 italic text-sm">Gagal memuat riwayat: Pastikan URL GAS benar dan di-Deploy versi baru.</p>`;
       }
     }
 
-    // Panggil saat aplikasi dimuat
     document.addEventListener("DOMContentLoaded", fetchHistoryFromSpreadsheet);
 
-    // --- UPLOAD & PARSE DATA [MODIFIED] ---
+    // --- UPLOAD & PARSE DATA EXCEL ---
     document.getElementById('fileUpload').addEventListener('change', function(e) {
       const file = e.target.files[0];
       if (!file) return;
@@ -276,59 +304,86 @@
           
           if (globalData.length > 0) {
             const headers = Object.keys(globalData[0]);
-            const colSelect = document.getElementById('columnSelect');
             
-            // --- PERBAIKAN 1: Tambahkan opsi default kosong sebagai penahan ---
-            colSelect.innerHTML = '<option value="" disabled selected>-- Pilih Acuan Pemisah --</option>';
-            headers.forEach(h => colSelect.appendChild(new Option(h, h)));
+            // Populasi Pilihan 3 Dropdown Acuan
+            [1, 2, 3].forEach(num => {
+              const select = document.getElementById(`columnSelect${num}`);
+              select.innerHTML = `<option value="">-- ${num === 1 ? 'Pilih Acuan Utama (Wajib)' : 'Tanpa Acuan Tambahan'} --</option>`;
+              headers.forEach(h => select.appendChild(new Option(h, h)));
+            });
             
-            // --- PERBAIKAN 2: Hanya tampilkan Step 2, tahan Step 3 & Tombol ---
             document.getElementById('step2').classList.remove('hidden');
-            document.getElementById('step3').classList.add('hidden'); // Sembunyikan Step 3
-            document.getElementById('processBtn').classList.add('hidden'); // Sembunyikan Tombol
-            document.getElementById('processBtn').classList.remove('flex');
+            document.getElementById('step3').classList.add('hidden');
+            document.getElementById('processBtn').classList.add('hidden');
             
-            // --- PERBAIKAN 3: Siapkan Dashboard statis tanpa memproses kategori ---
             document.getElementById('dashRows').innerText = globalData.length;
             document.getElementById('dashCols').innerText = headers.length;
             document.getElementById('dashCats').innerText = "0";
             document.getElementById('rincianBox').innerHTML = '<p class="text-center text-slate-500 py-8">Silakan pilih acuan pemisah di tab Split.</p>';
             document.getElementById('dbDataContainer').innerHTML = '<div class="col-span-full text-center text-slate-500 py-10 bg-slate-800/30 rounded-xl border border-white/5">Menunggu pemilihan acuan pemisah...</div>';
             
-            addLog(`Sukses membaca ${globalData.length} baris data. Menunggu instruksi pemisah.`, "text-green-400 font-bold");
+            addLog(`Sukses membaca ${globalData.length} baris data. Menunggu instruksi acuan pemisah.`, "text-green-400 font-bold");
           }
         } catch (err) { addLog(`Error parsing file: ${err.message}`, "text-red-400"); }
       };
       reader.readAsArrayBuffer(file);
     });
 
-    // --- PERBAIKAN 4: Trigger render data HANYA setelah acuan dipilih ---
-    document.getElementById('columnSelect').addEventListener('change', (e) => { 
-      if(e.target.value !== "") {
-        // Munculkan Step 3 dan Tombol Proses
+    // --- MENDAPATKAN KOLOM ACUAN YANG AKTIF ---
+    function getSelectedColumns() {
+      const c1 = document.getElementById('columnSelect1').value;
+      const c2 = document.getElementById('columnSelect2').value;
+      const c3 = document.getElementById('columnSelect3').value;
+      
+      let cols = [];
+      if (c1) cols.push(c1);
+      if (c2 && c2 !== c1) cols.push(c2);
+      if (c3 && c3 !== c1 && c3 !== c2) cols.push(c3);
+      return cols;
+    }
+
+    // --- MENGASOSIASIKAN COMBINED CATEGORY ---
+    function getCategoryValue(row, selectedCols) {
+      if (selectedCols.length === 0) return 'Uncategorized';
+      return selectedCols.map(col => String(row[col] || 'KOSONG').trim()).join(' - ');
+    }
+
+    function handleColumnChange() {
+      const selectedCols = getSelectedColumns();
+      if (selectedCols.length > 0) {
         document.getElementById('step3').classList.remove('hidden');
         document.getElementById('processBtn').classList.remove('hidden');
         document.getElementById('processBtn').classList.add('flex');
         
-        // Render data sesuai acuan yang dipilih
         updateDashboard(); 
         renderDataCards(); 
         
-        addLog(`Acuan pemisah dipilih: ${e.target.value}`, "text-blue-400");
+        addLog(`Acuan pemisah aktif: ${selectedCols.join(' -> ')}`, "text-blue-400");
+      } else {
+        document.getElementById('step3').classList.add('hidden');
+        document.getElementById('processBtn').classList.add('hidden');
       }
-    });
+    }
     
-    document.getElementById('selectAll').addEventListener('change', e => { document.querySelectorAll('.cat-checkbox').forEach(cb => cb.checked = e.target.checked); });
+    document.getElementById('selectAll').addEventListener('change', e => { 
+      document.querySelectorAll('.cat-checkbox').forEach(cb => cb.checked = e.target.checked); 
+    });
 
-    // --- DASHBOARD UPDATE [LOCKED] ---
+    // --- UPDATE DASHBOARD ---
     function updateDashboard() {
-      const colName = document.getElementById('columnSelect').value;
+      const selectedCols = getSelectedColumns();
       const countMap = {};
-      globalData.forEach(row => { if (row[colName]) countMap[row[colName]] = (countMap[row[colName]] || 0) + 1; });
-      const uniqueCats = Object.keys(countMap).sort();
+
+      globalData.forEach(row => {
+        const cat = getCategoryValue(row, selectedCols);
+        countMap[cat] = (countMap[cat] || 0) + 1;
+      });
+
+      // Uraikan dan Urutkan Abjad (A-Z)
+      const uniqueCats = Object.keys(countMap).sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
 
       document.getElementById('dashRows').innerText = globalData.length;
-      document.getElementById('dashCols').innerText = Object.keys(globalData[0]).length;
+      document.getElementById('dashCols').innerText = Object.keys(globalData[0] || {}).length;
       document.getElementById('dashCats').innerText = uniqueCats.length;
 
       const rincianBox = document.getElementById('rincianBox');
@@ -338,7 +393,7 @@
       uniqueCats.forEach(cat => {
         const div = document.createElement('div');
         div.className = "flex justify-between items-center py-3 border-b border-white/5 animate-fade-in";
-        div.innerHTML = `<span class="text-slate-300"><i class="fas fa-tag text-slate-600 mr-3"></i>${cat}</span><span class="bg-violet-500/20 text-violet-300 px-3 py-1 rounded-full text-xs font-bold">${countMap[cat]} Data</span>`;
+        div.innerHTML = `<span class="text-slate-300 font-medium"><i class="fas fa-tag text-slate-500 mr-3"></i>${cat}</span><span class="bg-violet-500/20 text-violet-300 px-3 py-1 rounded-full text-xs font-bold">${countMap[cat]} Data</span>`;
         rincianBox.appendChild(div);
 
         const label = document.createElement('label');
@@ -349,22 +404,23 @@
       document.getElementById('selectAll').checked = true;
     }
 
-    // --- DATABASE CARDS KATEGORI [LOCKED] ---
+    // --- RENDER DATABASE CARDS ---
     function renderDataCards() {
       const container = document.getElementById('dbDataContainer');
-      const colName = document.getElementById('columnSelect').value;
+      const selectedCols = getSelectedColumns();
       const filterVal = document.getElementById('dbFilterVal').value.toLowerCase();
       
       if(globalData.length === 0) return;
 
       const grouped = {};
       globalData.forEach(row => {
-        const val = row[colName] || 'Uncategorized';
+        const val = getCategoryValue(row, selectedCols);
         if(!grouped[val]) grouped[val] = [];
         grouped[val].push(row);
       });
 
-      let categories = Object.keys(grouped).sort();
+      // Urutkan Abjad
+      let categories = Object.keys(grouped).sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
       if (filterVal) categories = categories.filter(c => c.toLowerCase().includes(filterVal));
 
       document.getElementById('dataCountLabel').innerText = `${categories.length} Kategori`;
@@ -378,48 +434,84 @@
          const count = grouped[cat].length;
          const safeCat = cat.replace(/'/g, "\\'").replace(/"/g, '\\"');
          return `
-         <div onclick="openModal('${safeCat}')" class="bg-slate-800/80 p-5 rounded-xl border border-white/10 hover:border-violet-500 hover:shadow-[0_0_20px_rgba(107,70,193,0.3)] transition-all cursor-pointer transform hover:-translate-y-1 group">
-           <div class="flex justify-between items-start mb-4">
-             <h3 class="font-bold text-white text-lg pr-2 group-hover:text-violet-400 transition-colors"><i class="fas fa-folder-open text-violet-500 mr-2"></i>${cat}</h3>
+         <div class="bg-slate-800/80 p-5 rounded-xl border border-white/10 hover:border-violet-500 hover:shadow-[0_0_20px_rgba(107,70,193,0.3)] transition-all transform hover:-translate-y-1 group relative flex flex-col justify-between">
+           <div>
+             <div class="flex justify-between items-start mb-4 cursor-pointer" onclick="openModal('${safeCat}')">
+               <h3 class="font-bold text-white text-lg pr-2 group-hover:text-violet-400 transition-colors"><i class="fas fa-folder-open text-violet-500 mr-2"></i>${cat}</h3>
+             </div>
            </div>
-           <div class="flex justify-between items-center border-t border-white/5 pt-3">
+           <div class="flex justify-between items-center border-t border-white/5 pt-3 mt-4">
              <span class="bg-violet-500/20 text-violet-300 px-3 py-1 rounded-full text-xs font-bold">${count} Baris Data</span>
-             <span class="text-xs text-slate-400 group-hover:text-white transition-colors">Klik Rincian <i class="fas fa-arrow-right ml-1"></i></span>
+             <div class="flex gap-2">
+               <button onclick="downloadSingleExcel('${safeCat}')" class="text-xs bg-emerald-600/80 hover:bg-emerald-500 text-white px-2.5 py-1 rounded-lg transition-colors" title="Download Excel Saja"><i class="fas fa-download"></i></button>
+               <button onclick="openModal('${safeCat}')" class="text-xs bg-violet-600/80 hover:bg-violet-500 text-white px-3 py-1 rounded-lg transition-colors">Rincian <i class="fas fa-arrow-right ml-1"></i></button>
+             </div>
            </div>
          </div>`;
       }).join('');
     }
 
-    // --- MODAL LOGIC [LOCKED] ---
+    // --- FITUR DOWNLOAD EXCEL UNTUK TIPE DATA TERTENTU ---
+    function downloadSingleExcel(category) {
+      const selectedCols = getSelectedColumns();
+      const data = globalData.filter(r => getCategoryValue(r, selectedCols) === category);
+      
+      if(data.length === 0) return alert("Data kosong.");
+
+      const safeCatName = String(category).replace(/[/\\?%*:|"<>]/g, '-');
+      const filename = `${safeCatName} - ${originalFileName || 'SplitData'}.xlsx`;
+
+      const ws = XLSX.utils.json_to_sheet(data);
+      applyNeatExcelFormat(ws, data);
+      
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Data Split");
+      XLSX.writeFile(wb, filename);
+      addLog(`Mendownload file Excel lokal: ${filename}`, "text-green-400");
+    }
+
+    // --- MODAL RINCIAN & PIVOT LENGKAP ---
     function openModal(category) {
-      const colName = document.getElementById('columnSelect').value;
-      const data = globalData.filter(r => (r[colName] || 'Uncategorized') === category);
+      const selectedCols = getSelectedColumns();
+      const data = globalData.filter(r => getCategoryValue(r, selectedCols) === category);
+      if (data.length === 0) return;
+
       const headers = Object.keys(data[0] || {});
       
-      document.getElementById('modalTitle').innerHTML = `<i class="fas fa-layer-group mr-3"></i> ${category} <span class="ml-3 text-xs bg-violet-500 text-white px-3 py-1 rounded-full shadow-lg">Total: ${data.length}</span>`;
+      document.getElementById('modalTitle').innerHTML = `<i class="fas fa-layer-group mr-3"></i> ${category} <span class="ml-3 text-xs bg-violet-500 text-white px-3 py-1 rounded-full shadow-lg">Total: ${data.length} Data</span>`;
       
-      let subCol = headers.includes('KEC_NAME') ? 'KEC_NAME' : (headers.includes('KEL_NAME') ? 'KEL_NAME' : headers[1]);
-      document.getElementById('modalBreakdownTitle').innerHTML = `<i class="fas fa-chart-pie mr-2"></i>Rincian per ${subCol}:`;
+      // Tentukan Kolom Pivot Sub-Rincian (Mencari kolom yang belum dijadikan acuan utama)
+      let subCol = headers.find(h => !selectedCols.includes(h) && (h.includes('KEC') || h.includes('KEL') || h.includes('NAMA') || h.includes('KAB') || h.includes('KOTA'))) || headers.find(h => !selectedCols.includes(h)) || headers[0];
+      
+      document.getElementById('modalBreakdownTitle').innerHTML = `<i class="fas fa-chart-pie mr-2"></i>Rincian Pivot per ${subCol} (Terurut Abjad):`;
       
       const subGroup = {};
       data.forEach(r => {
-        const val = r[subCol] || 'Data Kosong';
+        const val = String(r[subCol] || 'Data Kosong').trim();
         subGroup[val] = (subGroup[val] || 0) + 1;
       });
 
-      document.getElementById('modalBreakdown').innerHTML = Object.keys(subGroup).sort().map(sub => `
+      // Urutkan Pivot secara Abjad
+      const sortedSubKeys = Object.keys(subGroup).sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
+
+      document.getElementById('modalBreakdown').innerHTML = sortedSubKeys.map(sub => `
         <div class="bg-slate-900/80 p-3 rounded-lg border border-white/5 flex justify-between items-center shadow-inner">
           <span class="text-xs text-slate-300 truncate mr-2 font-medium" title="${sub}">${sub}</span>
           <span class="text-xs font-black text-violet-400 bg-violet-500/10 px-2 py-1 rounded">${subGroup[sub]}</span>
         </div>
       `).join('');
 
+      // Menyiapkan Action Tombol Download Excel di Modal
+      const modalDlBtn = document.getElementById('modalDownloadBtn');
+      modalDlBtn.onclick = () => downloadSingleExcel(category);
+
+      // Render Head & Body Table
       document.getElementById('modalTableHead').innerHTML = `<tr>${headers.map(h => `<th class="px-4 py-3 border-b border-white/10">${h}</th>`).join('')}</tr>`;
       
       const limitData = data.slice(0, 100);
       document.getElementById('modalTableBody').innerHTML = limitData.map(r => `
         <tr class="hover:bg-white/5 transition-colors">
-          ${headers.map(h => `<td class="px-4 py-2 border-b border-white/5 truncate max-w-[150px]" title="${r[h] || ''}">${r[h] || '-'}</td>`).join('')}
+          ${headers.map(h => `<td class="px-4 py-2 border-b border-white/5 truncate max-w-[150px]" title="${r[h] \vert{}\vert{} ''}">${r[h] || '-'}</td>`).join('')}
         </tr>
       `).join('');
       
@@ -438,7 +530,7 @@
       modal.classList.remove('flex');
     }
 
-    // --- FORMAT EXCEL (AUTO-FIT KOLOM & AUTO-FILTER) [LOCKED] ---
+    // --- FORMAT EXCEL (AUTO-FIT KOLOM & AUTO-FILTER) ---
     function applyNeatExcelFormat(ws, dataToFormat) {
       if(!dataToFormat || dataToFormat.length === 0) return;
       const keys = Object.keys(dataToFormat[0]);
@@ -459,9 +551,9 @@
       ws['!autofilter'] = { ref: XLSX.utils.encode_range(range) };
     }
 
-    // --- PROSES & UPLOAD [LOCKED] ---
+    // --- PROSES & UPLOAD DRIVE / SPREADSHEET ---
     document.getElementById('processBtn').addEventListener('click', async function() {
-      const colName = document.getElementById('columnSelect').value;
+      const selectedCols = getSelectedColumns();
       const selectedCats = Array.from(document.querySelectorAll('.cat-checkbox:checked')).map(cb => cb.value);
 
       if (selectedCats.length === 0) return alert("Centang minimal satu kategori!");
@@ -501,7 +593,7 @@
         if(res.status === 'success') addLog(`✓ Master Rapi Tersimpan di Drive!`, "text-green-400");
       } catch (e) { addLog(`✗ Error Master: ${e.message}`, "text-red-400"); }
 
-      // B. Split Files 
+      // B. Split Files
       for (let i = 0; i < selectedCats.length; i++) {
         const cat = selectedCats[i];
         loaderText.innerText = `Menyimpan Split: ${cat} (${i+1}/${selectedCats.length})...`;
@@ -509,7 +601,7 @@
         await new Promise(r => setTimeout(r, 100));
 
         try {
-          const filteredData = globalData.filter(r => r[colName] == cat);
+          const filteredData = globalData.filter(r => getCategoryValue(r, selectedCols) === cat);
           const safeCatName = String(cat).replace(/[/\\?%*:|"<>]/g, '-');
           
           const ws = XLSX.utils.json_to_sheet(filteredData);
@@ -520,7 +612,7 @@
           const b64Str = XLSX.write(wb, { bookType: 'xlsx', type: 'base64' });
 
           const res = await sendToGAS({ action: 'saveExcel', base64Data: b64Str, fileName: `${safeCatName} - ${originalFileName}.xlsx`, subFolderName: masterFolderName });
-          if(res.status === 'success') addLog(`✓ Sukses: ${cat}`, "text-green-400");
+          if(res.status === 'success') addLog(`✓ Sukses Tersimpan di Drive: ${cat}`, "text-green-400");
         } catch (e) { addLog(`✗ Error Split: ${e.message}`, "text-red-400"); }
       }
 
@@ -529,19 +621,22 @@
       addLog("Menyinkronkan rekap ke Google Spreadsheet...", "text-yellow-400");
       try {
         const resLog = await sendToGAS({ 
-          action: 'saveLog', fileName: originalFileName, colName: colName, 
-          totalCats: selectedCats.length, totalRows: globalData.length 
+          action: 'saveLog', 
+          fileName: originalFileName, 
+          colName: selectedCols.join(' -> '), 
+          totalCats: selectedCats.length, 
+          totalRows: globalData.length 
         });
         if (resLog.status === 'success') {
           addLog("✓ Riwayat sukses terekam di Spreadsheet Auto Sempurna!", "text-green-400 font-bold");
-          fetchHistoryFromSpreadsheet(); // Auto-refresh riwayat di Database
+          fetchHistoryFromSpreadsheet();
         } else addLog(`✗ Spreadsheet Error: ${resLog.message}`, "text-red-400");
       } catch (e) { addLog(`✗ Gagal rekap riwayat: ${e.message}`, "text-red-400"); }
 
       loader.classList.remove('flex');
       loader.classList.add('hidden');
       addLog(`PROSES TUNTAS.`, "text-green-400 font-bold text-lg");
-      alert("Proses Selesai!\nData berhasil di-split secara rapi (Drive) dan tercatat di Spreadsheet.");
+      alert("Proses Selesai!\nData berhasil di-split multi-kategori (Drive) dan tercatat di Spreadsheet.");
     });
   </script>
 </body>
