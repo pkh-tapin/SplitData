@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-  <title>Agenda Split Data Enterprise - Advanced Multi-Category</title>
+  <title>Agenda Split Data Enterprise - Instant & Optimized</title>
   
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
@@ -15,16 +15,16 @@
       theme: {
         extend: {
           colors: { slate: { 850: '#151e2e', 900: '#0f172a' } },
-          animation: { 'fade-in': 'fadeIn 0.4s ease-out forwards', 'slide-up': 'slideUp 0.4s ease-out forwards' },
+          animation: { 'fade-in': 'fadeIn 0.3s ease-out forwards', 'slide-up': 'slideUp 0.3s ease-out forwards' },
           keyframes: { 
-            fadeIn: { '0%': { opacity: '0', transform: 'translateY(10px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
-            slideUp: { '0%': { opacity: '0', transform: 'translateY(50px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } }
+            fadeIn: { '0%': { opacity: '0', transform: 'translateY(5px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
+            slideUp: { '0%': { opacity: '0', transform: 'translateY(20px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } }
           }
         }
       }
     }
 
-    // [BLUEPRINT LOCKED] 🔴 URL WEB APP GOOGLE APPS SCRIPT ANDA
+    // 🔴 GANTI DENGAN URL WEB APP GOOGLE APPS SCRIPT ANDA
     const GAS_API_URL = "https://script.google.com/macros/s/AKfycbw5bQE3OyQ8LE64Vdu3XgP3kBEmRAJtyajI9L21uY6bxYa9hvpbrENEJiItF6IBoA6YxQ/exec";
   </script>
 
@@ -39,23 +39,28 @@
     .tab-content.active { display: block; }
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    
+    /* PERBAIKAN UTAMA: Mencegah overlay/modal memblokir klik menu saat tidak aktif */
+    .modal-hidden { display: none !important; pointer-events: none !important; }
+    .modal-flex { display: flex !important; pointer-events: auto !important; }
   </style>
 </head>
 <body class="min-h-screen flex flex-col items-center py-6 px-4">
 
   <div class="w-full max-w-5xl glass-panel rounded-3xl shadow-[0_0_50px_rgba(107,70,193,0.15)] overflow-hidden transition-all relative z-10">
     
-    <div class="flex w-full bg-slate-800/60 border-b border-white/10 sticky top-0 z-20 overflow-x-auto no-scrollbar whitespace-nowrap shadow-md">
-      <button onclick="switchTab('dashboard')" id="btn-dashboard" class="flex-1 min-w-[130px] py-4 text-sm font-semibold border-b-2 border-violet-500 text-white bg-white/5 transition-all">
+    <!-- NAVIGATION TABS (Dijamin Responsif & Klik Langsung Berfungsi) -->
+    <div class="flex w-full bg-slate-800/90 border-b border-white/10 sticky top-0 z-50 overflow-x-auto no-scrollbar whitespace-nowrap shadow-md">
+      <button onclick="switchTab('dashboard')" id="btn-dashboard" class="flex-1 min-w-[130px] py-4 text-sm font-semibold border-b-2 border-violet-500 text-white bg-white/5 transition-all cursor-pointer">
         <i class="fas fa-chart-pie mr-2"></i> Dashboard
       </button>
-      <button onclick="switchTab('split')" id="btn-split" class="flex-1 min-w-[130px] py-4 text-sm font-semibold border-b-2 border-transparent text-slate-400 hover:text-white hover:bg-white/5 transition-all">
+      <button onclick="switchTab('split')" id="btn-split" class="flex-1 min-w-[130px] py-4 text-sm font-semibold border-b-2 border-transparent text-slate-400 hover:text-white hover:bg-white/5 transition-all cursor-pointer">
         <i class="fas fa-layer-group mr-2"></i> Split Data
       </button>
-      <button onclick="switchTab('database')" id="btn-database" class="flex-1 min-w-[130px] py-4 text-sm font-semibold border-b-2 border-transparent text-slate-400 hover:text-white hover:bg-white/5 transition-all">
+      <button onclick="switchTab('database')" id="btn-database" class="flex-1 min-w-[130px] py-4 text-sm font-semibold border-b-2 border-transparent text-slate-400 hover:text-white hover:bg-white/5 transition-all cursor-pointer">
         <i class="fas fa-database mr-2"></i> Database
       </button>
-      <button onclick="switchTab('log')" id="btn-log" class="flex-1 min-w-[130px] py-4 text-sm font-semibold border-b-2 border-transparent text-slate-400 hover:text-white hover:bg-white/5 transition-all">
+      <button onclick="switchTab('log')" id="btn-log" class="flex-1 min-w-[130px] py-4 text-sm font-semibold border-b-2 border-transparent text-slate-400 hover:text-white hover:bg-white/5 transition-all cursor-pointer">
         <i class="fas fa-terminal mr-2"></i> Console Log
       </button>
     </div>
@@ -66,20 +71,20 @@
       <div id="tab-dashboard" class="tab-content active animate-fade-in">
         <h2 class="text-2xl font-bold text-white mb-6 text-center tracking-wide"><i class="fas fa-chart-bar text-violet-500 mr-2"></i>Statistik Database</h2>
         <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
-          <div class="bg-slate-800/80 rounded-2xl p-6 text-center border border-white/5">
+          <div class="bg-slate-800/80 rounded-2xl p-6 text-center border border-white/5 shadow">
             <div id="dashRows" class="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-indigo-400 mb-2">0</div>
             <div class="text-xs font-bold text-slate-400 uppercase tracking-widest">Total Baris</div>
           </div>
-          <div class="bg-slate-800/80 rounded-2xl p-6 text-center border border-white/5">
+          <div class="bg-slate-800/80 rounded-2xl p-6 text-center border border-white/5 shadow">
             <div id="dashCats" class="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-indigo-400 mb-2">0</div>
             <div class="text-xs font-bold text-slate-400 uppercase tracking-widest">Kategori Unik</div>
           </div>
-          <div class="bg-slate-800/80 rounded-2xl p-6 text-center border border-white/5 col-span-2 md:col-span-1">
+          <div class="bg-slate-800/80 rounded-2xl p-6 text-center border border-white/5 col-span-2 md:col-span-1 shadow">
             <div id="dashCols" class="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-indigo-400 mb-2">0</div>
             <div class="text-xs font-bold text-slate-400 uppercase tracking-widest">Total Kolom</div>
           </div>
         </div>
-        <label class="font-semibold text-slate-300 mb-4 block"><i class="fas fa-list-ul mr-2"></i>Rincian Kategori (Terurut Abjad):</label>
+        <label class="font-semibold text-slate-300 mb-4 block"><i class="fas fa-list-ul mr-2"></i>Rincian Kategori (Terurut Abjad A-Z):</label>
         <div id="rincianBox" class="bg-slate-800/50 rounded-2xl border border-white/5 p-4 max-h-72 overflow-y-auto">
           <p class="text-center text-slate-500 py-8">Belum ada data diunggah.</p>
         </div>
@@ -87,13 +92,13 @@
 
       <!-- TAB 2: SPLIT DATA -->
       <div id="tab-split" class="tab-content animate-fade-in">
-        <h2 class="text-2xl font-bold text-white mb-6 text-center tracking-wide"><i class="fas fa-folder-tree text-violet-500 mr-2"></i>Arsip & Eksekusi Split Multi-Kategori</h2>
+        <h2 class="text-2xl font-bold text-white mb-6 text-center tracking-wide"><i class="fas fa-folder-tree text-violet-500 mr-2"></i>Arsip & Eksekusi Split Instan</h2>
         
         <div class="mb-6">
-          <label class="font-semibold text-slate-300 mb-3 block">1. Upload Database (Excel Mentah)</label>
+          <label class="font-semibold text-slate-300 mb-3 block">1. Upload Database (Excel Mentah - Tanpa Freeze)</label>
           <div class="relative">
             <input type="file" id="fileUpload" accept=".xlsx, .xls" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
-            <div class="bg-slate-800 border border-slate-600 hover:border-violet-500 rounded-xl p-5 flex items-center justify-center transition-all duration-300">
+            <div class="bg-slate-800 border border-slate-600 hover:border-violet-500 rounded-xl p-5 flex items-center justify-center transition-all duration-300 shadow">
               <i class="fas fa-cloud-upload-alt text-3xl text-violet-500 mr-3"></i>
               <span class="text-slate-300 font-medium text-lg">Pilih File Excel</span>
             </div>
@@ -102,33 +107,33 @@
         </div>
 
         <div id="step2" class="mb-6 animate-fade-in hidden">
-          <label class="font-semibold text-slate-300 mb-3 block">2. Pilih Acuan Pemisah (Bisa 1-3 Kategori Hierarki)</label>
+          <label class="font-semibold text-slate-300 mb-3 block">2. Pilih Acuan Pemisah (Maksimal 3 Kategori Hierarki)</label>
           <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
             <div>
-              <span class="text-xs text-slate-400 mb-1 block">Kolom Acuan 1 (Utama - misal: Provinsi)</span>
-              <select id="columnSelect1" onchange="handleColumnChange()" class="w-full bg-slate-800 border border-slate-600 text-white rounded-xl p-3 focus:ring-2 focus:ring-violet-500 outline-none text-sm"></select>
+              <span class="text-xs text-slate-400 mb-1 block">Acuan 1 (Utama - Misal: Provinsi)</span>
+              <select id="columnSelect1" onchange="handleColumnChange()" class="w-full bg-slate-800 border border-slate-600 text-white rounded-xl p-3 focus:ring-2 focus:ring-violet-500 outline-none text-sm cursor-pointer"></select>
             </div>
             <div>
-              <span class="text-xs text-slate-400 mb-1 block">Kolom Acuan 2 (Opsional - misal: Kabupaten)</span>
-              <select id="columnSelect2" onchange="handleColumnChange()" class="w-full bg-slate-800 border border-slate-600 text-white rounded-xl p-3 focus:ring-2 focus:ring-violet-500 outline-none text-sm"></select>
+              <span class="text-xs text-slate-400 mb-1 block">Acuan 2 (Opsional - Misal: Kabupaten)</span>
+              <select id="columnSelect2" onchange="handleColumnChange()" class="w-full bg-slate-800 border border-slate-600 text-white rounded-xl p-3 focus:ring-2 focus:ring-violet-500 outline-none text-sm cursor-pointer"></select>
             </div>
             <div>
-              <span class="text-xs text-slate-400 mb-1 block">Kolom Acuan 3 (Opsional - misal: Kecamatan)</span>
-              <select id="columnSelect3" onchange="handleColumnChange()" class="w-full bg-slate-800 border border-slate-600 text-white rounded-xl p-3 focus:ring-2 focus:ring-violet-500 outline-none text-sm"></select>
+              <span class="text-xs text-slate-400 mb-1 block">Acuan 3 (Opsional - Misal: Kecamatan)</span>
+              <select id="columnSelect3" onchange="handleColumnChange()" class="w-full bg-slate-800 border border-slate-600 text-white rounded-xl p-3 focus:ring-2 focus:ring-violet-500 outline-none text-sm cursor-pointer"></select>
             </div>
           </div>
         </div>
 
         <div id="step3" class="mb-6 animate-fade-in hidden">
-          <label class="font-semibold text-slate-300 mb-3 block">3. Pilih Hasil Kategori Target (Terurut Abjad)</label>
+          <label class="font-semibold text-slate-300 mb-3 block">3. Pilih Kategori Target (Terurut Abjad A-Z)</label>
           <label class="flex items-center bg-slate-800/80 p-4 rounded-xl border border-violet-500/30 cursor-pointer mb-3">
-            <input type="checkbox" id="selectAll" checked class="w-5 h-5 accent-violet-500 mr-3" />
+            <input type="checkbox" id="selectAll" checked class="w-5 h-5 accent-violet-500 mr-3 cursor-pointer" />
             <span class="font-bold text-white">Pilih Semua Kategori</span>
           </label>
           <div id="checklistContainer" class="bg-slate-800/50 rounded-xl border border-white/5 p-2 max-h-60 overflow-y-auto"></div>
         </div>
 
-        <button id="processBtn" class="hidden w-full bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 text-white font-bold py-4 rounded-xl shadow-[0_0_20px_rgba(107,70,193,0.4)] transition-all flex justify-center items-center gap-3">
+        <button id="processBtn" class="hidden w-full bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 text-white font-bold py-4 rounded-xl shadow-[0_0_20px_rgba(107,70,193,0.4)] transition-all flex justify-center items-center gap-3 cursor-pointer">
           <i class="fas fa-rocket"></i> Proses & Sinkronisasi
         </button>
       </div>
@@ -139,7 +144,7 @@
 
         <div class="flex justify-between items-center mb-3">
           <label class="font-semibold text-slate-300"><i class="fas fa-history mr-2"></i>Riwayat Eksekusi (Dari Spreadsheet)</label>
-          <button onclick="fetchHistoryFromSpreadsheet()" class="text-xs bg-slate-800 hover:bg-slate-700 text-white px-3 py-1 rounded border border-white/10 transition-colors"><i class="fas fa-sync-alt mr-1"></i> Refresh</button>
+          <button onclick="fetchHistoryFromSpreadsheet()" class="text-xs bg-slate-800 hover:bg-slate-700 text-white px-3 py-1 rounded border border-white/10 transition-colors cursor-pointer"><i class="fas fa-sync-alt mr-1"></i> Refresh</button>
         </div>
         <div class="flex overflow-x-auto no-scrollbar gap-4 pb-4 mb-6" id="historyContainer">
           <p class="text-slate-500 italic text-sm"><i class="fas fa-spinner fa-spin mr-2"></i>Memuat riwayat dari Google Spreadsheet...</p>
@@ -148,14 +153,14 @@
         <hr class="border-white/10 mb-6">
 
         <div class="flex flex-col md:flex-row md:justify-between md:items-end mb-4 gap-2">
-          <label class="font-semibold text-slate-300 block"><i class="fas fa-th-large mr-2"></i>Rincian Data Aktif (Card View - Terurut Abjad)</label>
+          <label class="font-semibold text-slate-300 block"><i class="fas fa-th-large mr-2"></i>Rincian Data Aktif (Card View - Terurut Abjad A-Z)</label>
           <span id="dataCountLabel" class="text-xs font-bold bg-violet-500/20 text-violet-300 px-3 py-1 rounded-full w-fit">0 Kategori</span>
         </div>
 
         <div class="bg-slate-800/80 rounded-xl p-3 border border-white/5 mb-6">
           <div class="relative w-full">
             <i class="fas fa-search absolute left-4 top-3 text-slate-400"></i>
-            <input type="text" id="dbFilterVal" oninput="renderDataCards()" placeholder="Cari nama Provinsi / Kabupaten / Kategori..." class="w-full bg-slate-900 border border-slate-700 text-white rounded-lg pl-10 pr-4 py-2 text-sm focus:ring-2 focus:ring-violet-500 outline-none">
+            <input type="text" id="dbFilterVal" oninput="renderDataCards()" placeholder="Cari nama kategori..." class="w-full bg-slate-900 border border-slate-700 text-white rounded-lg pl-10 pr-4 py-2 text-sm focus:ring-2 focus:ring-violet-500 outline-none">
           </div>
         </div>
 
@@ -179,19 +184,19 @@
     </div>
   </div>
 
-  <!-- MODAL DETAIL & PIVOT -->
-  <div id="detailModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-[100] hidden flex-col justify-center items-center px-4">
+  <!-- MODAL DETAIL & PIVOT (Diperbaiki agar tidak memblokir klik saat tertutup) -->
+  <div id="detailModal" class="fixed inset-0 bg-slate-900/85 backdrop-blur-md z-[100] modal-hidden flex-col justify-center items-center px-4">
     <div class="bg-slate-800 border border-white/20 rounded-2xl w-full max-w-5xl max-h-[90vh] flex flex-col shadow-2xl animate-slide-up">
       <div class="p-5 border-b border-white/10 flex justify-between items-center bg-slate-900/50 rounded-t-2xl">
         <h3 id="modalTitle" class="text-xl font-bold text-violet-400 flex items-center"></h3>
-        <button onclick="closeModal()" class="text-slate-400 hover:text-white transition-colors"><i class="fas fa-times text-2xl"></i></button>
+        <button onclick="closeModal()" class="text-slate-400 hover:text-white transition-colors cursor-pointer"><i class="fas fa-times text-2xl"></i></button>
       </div>
       <div class="p-6 overflow-y-auto flex-1 custom-scrollbar">
         
         <div class="mb-6">
           <div class="flex justify-between items-center mb-3 border-b border-white/5 pb-2">
             <h4 id="modalBreakdownTitle" class="text-sm font-bold text-slate-300"></h4>
-            <button id="modalDownloadBtn" class="text-xs bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3 py-1.5 rounded-lg shadow transition-all flex items-center gap-1">
+            <button id="modalDownloadBtn" class="text-xs bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3 py-1.5 rounded-lg shadow transition-all flex items-center gap-1 cursor-pointer">
               <i class="fas fa-file-excel"></i> Download Excel
             </button>
           </div>
@@ -209,8 +214,8 @@
     </div>
   </div>
 
-  <!-- LOADER OVERLAY -->
-  <div id="loaderOverlay" class="fixed inset-0 bg-slate-900/90 backdrop-blur-md z-[100] hidden flex-col justify-center items-center px-4 animate-fade-in">
+  <!-- LOADER OVERLAY (Non-Blocking & Aman) -->
+  <div id="loaderOverlay" class="fixed inset-0 bg-slate-900/90 backdrop-blur-md z-[110] modal-hidden flex-col justify-center items-center px-4 animate-fade-in">
     <div class="relative w-24 h-24 mb-8">
       <div class="absolute inset-0 border-4 border-violet-500/20 rounded-full"></div>
       <div class="absolute inset-0 border-4 border-violet-500 rounded-full border-t-transparent animate-spin"></div>
@@ -221,18 +226,24 @@
   </div>
 
   <script>
-    // --- UI NAVIGATION ---
+    // --- NAVIGASI TAB (DIJAMIN KLIK RESPONSIF TANPA MACET) ---
     function switchTab(tabId) {
       document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
       ['dashboard', 'split', 'database', 'log'].forEach(id => {
         const btn = document.getElementById('btn-' + id);
-        btn.classList.remove('border-violet-500', 'text-white', 'bg-white/5');
-        btn.classList.add('border-transparent', 'text-slate-400');
+        if(btn) {
+          btn.classList.remove('border-violet-500', 'text-white', 'bg-white/5');
+          btn.classList.add('border-transparent', 'text-slate-400');
+        }
       });
-      document.getElementById('tab-' + tabId).classList.add('active');
+      const activeTab = document.getElementById('tab-' + tabId);
+      if(activeTab) activeTab.classList.add('active');
+      
       const activeBtn = document.getElementById('btn-' + tabId);
-      activeBtn.classList.remove('border-transparent', 'text-slate-400');
-      activeBtn.classList.add('border-violet-500', 'text-white', 'bg-white/5');
+      if(activeBtn) {
+        activeBtn.classList.remove('border-transparent', 'text-slate-400');
+        activeBtn.classList.add('border-violet-500', 'text-white', 'bg-white/5');
+      }
     }
 
     let globalData = [];
@@ -247,7 +258,7 @@
       logBox.scrollTop = logBox.scrollHeight;
     }
 
-    // --- MEMBACA RIWAYAT SPREADSHEET VIA API GAS ---
+    // --- MEMBACA RIWAYAT SPREADSHEET (ASINKRON NON-BLOCKING) ---
     async function fetchHistoryFromSpreadsheet() {
       const container = document.getElementById('historyContainer');
       container.innerHTML = '<p class="text-slate-500 italic text-sm"><i class="fas fa-spinner fa-spin mr-2"></i>Mengambil data dari Spreadsheet...</p>';
@@ -277,13 +288,13 @@
           container.innerHTML = '<p class="text-slate-500 italic text-sm">Spreadsheet aktif, namun belum ada riwayat tersimpan.</p>';
         }
       } catch (error) {
-        container.innerHTML = `<p class="text-red-400 italic text-sm">Gagal memuat riwayat: Pastikan URL GAS benar dan di-Deploy versi baru.</p>`;
+        container.innerHTML = `<p class="text-red-400 italic text-sm">Gagal memuat riwayat: Pastikan URL GAS benar.</p>`;
       }
     }
 
     document.addEventListener("DOMContentLoaded", fetchHistoryFromSpreadsheet);
 
-    // --- UPLOAD & PARSE DATA EXCEL ---
+    // --- UPLOAD & PARSE EXCEL TANPA FREEZE (ASINKRON INSTAN) ---
     document.getElementById('fileUpload').addEventListener('change', function(e) {
       const file = e.target.files[0];
       if (!file) return;
@@ -295,41 +306,43 @@
 
       const reader = new FileReader();
       reader.onload = function(event) {
-        try {
-          const data = new Uint8Array(event.target.result);
-          const workbook = XLSX.read(data, { type: 'array' });
-          const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-          
-          globalData = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
-          
-          if (globalData.length > 0) {
-            const headers = Object.keys(globalData[0]);
+        setTimeout(() => {
+          try {
+            const data = new Uint8Array(event.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+            const worksheet = workbook.Sheets[workbook.SheetNames[0]];
             
-            // Populasi Pilihan 3 Dropdown Acuan
-            [1, 2, 3].forEach(num => {
-              const select = document.getElementById(`columnSelect${num}`);
-              select.innerHTML = `<option value="">-- ${num === 1 ? 'Pilih Acuan Utama (Wajib)' : 'Tanpa Acuan Tambahan'} --</option>`;
-              headers.forEach(h => select.appendChild(new Option(h, h)));
-            });
+            globalData = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
             
-            document.getElementById('step2').classList.remove('hidden');
-            document.getElementById('step3').classList.add('hidden');
-            document.getElementById('processBtn').classList.add('hidden');
-            
-            document.getElementById('dashRows').innerText = globalData.length;
-            document.getElementById('dashCols').innerText = headers.length;
-            document.getElementById('dashCats').innerText = "0";
-            document.getElementById('rincianBox').innerHTML = '<p class="text-center text-slate-500 py-8">Silakan pilih acuan pemisah di tab Split.</p>';
-            document.getElementById('dbDataContainer').innerHTML = '<div class="col-span-full text-center text-slate-500 py-10 bg-slate-800/30 rounded-xl border border-white/5">Menunggu pemilihan acuan pemisah...</div>';
-            
-            addLog(`Sukses membaca ${globalData.length} baris data. Menunggu instruksi acuan pemisah.`, "text-green-400 font-bold");
+            if (globalData.length > 0) {
+              const headers = Object.keys(globalData[0]);
+              
+              [1, 2, 3].forEach(num => {
+                const select = document.getElementById(`columnSelect${num}`);
+                select.innerHTML = `<option value="">-- ${num === 1 ? 'Pilih Acuan Utama (Wajib)' : 'Tanpa Acuan Tambahan'} --</option>`;
+                headers.forEach(h => select.appendChild(new Option(h, h)));
+              });
+              
+              document.getElementById('step2').classList.remove('hidden');
+              document.getElementById('step3').classList.add('hidden');
+              document.getElementById('processBtn').classList.add('hidden');
+              
+              document.getElementById('dashRows').innerText = globalData.length;
+              document.getElementById('dashCols').innerText = headers.length;
+              document.getElementById('dashCats').innerText = "0";
+              document.getElementById('rincianBox').innerHTML = '<p class="text-center text-slate-500 py-8">Silakan pilih acuan pemisah di tab Split.</p>';
+              document.getElementById('dbDataContainer').innerHTML = '<div class="col-span-full text-center text-slate-500 py-10 bg-slate-800/30 rounded-xl border border-white/5">Menunggu pemilihan acuan pemisah...</div>';
+              
+              addLog(`Sukses membaca ${globalData.length} baris data instan. Menunggu acuan pemisah.`, "text-green-400 font-bold");
+            }
+          } catch (err) { 
+            addLog(`Error parsing file: ${err.message}`, "text-red-400"); 
           }
-        } catch (err) { addLog(`Error parsing file: ${err.message}`, "text-red-400"); }
+        }, 10);
       };
       reader.readAsArrayBuffer(file);
     });
 
-    // --- MENDAPATKAN KOLOM ACUAN YANG AKTIF ---
     function getSelectedColumns() {
       const c1 = document.getElementById('columnSelect1').value;
       const c2 = document.getElementById('columnSelect2').value;
@@ -342,7 +355,6 @@
       return cols;
     }
 
-    // --- MENGASOSIASIKAN COMBINED CATEGORY ---
     function getCategoryValue(row, selectedCols) {
       if (selectedCols.length === 0) return 'Uncategorized';
       return selectedCols.map(col => String(row[col] || 'KOSONG').trim()).join(' - ');
@@ -369,7 +381,6 @@
       document.querySelectorAll('.cat-checkbox').forEach(cb => cb.checked = e.target.checked); 
     });
 
-    // --- UPDATE DASHBOARD ---
     function updateDashboard() {
       const selectedCols = getSelectedColumns();
       const countMap = {};
@@ -379,7 +390,6 @@
         countMap[cat] = (countMap[cat] || 0) + 1;
       });
 
-      // Uraikan dan Urutkan Abjad (A-Z)
       const uniqueCats = Object.keys(countMap).sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
 
       document.getElementById('dashRows').innerText = globalData.length;
@@ -398,13 +408,12 @@
 
         const label = document.createElement('label');
         label.className = "flex items-center p-3 hover:bg-white/5 rounded-lg cursor-pointer animate-fade-in";
-        label.innerHTML = `<input type="checkbox" class="cat-checkbox w-5 h-5 accent-violet-500 mr-3" value="${cat}" checked> <span class="text-slate-300 flex-1">${cat}</span> <span class="text-xs text-slate-500 font-bold">(${countMap[cat]})</span>`;
+        label.innerHTML = `<input type="checkbox" class="cat-checkbox w-5 h-5 accent-violet-500 mr-3 cursor-pointer" value="${cat}" checked> <span class="text-slate-300 flex-1">${cat}</span> <span class="text-xs text-slate-500 font-bold">(${countMap[cat]})</span>`;
         checklistContainer.appendChild(label);
       });
       document.getElementById('selectAll').checked = true;
     }
 
-    // --- RENDER DATABASE CARDS ---
     function renderDataCards() {
       const container = document.getElementById('dbDataContainer');
       const selectedCols = getSelectedColumns();
@@ -419,7 +428,6 @@
         grouped[val].push(row);
       });
 
-      // Urutkan Abjad
       let categories = Object.keys(grouped).sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
       if (filterVal) categories = categories.filter(c => c.toLowerCase().includes(filterVal));
 
@@ -443,15 +451,14 @@
            <div class="flex justify-between items-center border-t border-white/5 pt-3 mt-4">
              <span class="bg-violet-500/20 text-violet-300 px-3 py-1 rounded-full text-xs font-bold">${count} Baris Data</span>
              <div class="flex gap-2">
-               <button onclick="downloadSingleExcel('${safeCat}')" class="text-xs bg-emerald-600/80 hover:bg-emerald-500 text-white px-2.5 py-1 rounded-lg transition-colors" title="Download Excel Saja"><i class="fas fa-download"></i></button>
-               <button onclick="openModal('${safeCat}')" class="text-xs bg-violet-600/80 hover:bg-violet-500 text-white px-3 py-1 rounded-lg transition-colors">Rincian <i class="fas fa-arrow-right ml-1"></i></button>
+               <button onclick="downloadSingleExcel('${safeCat}')" class="text-xs bg-emerald-600/80 hover:bg-emerald-500 text-white px-2.5 py-1 rounded-lg transition-colors cursor-pointer" title="Download Excel Saja"><i class="fas fa-download"></i></button>
+               <button onclick="openModal('${safeCat}')" class="text-xs bg-violet-600/80 hover:bg-violet-500 text-white px-3 py-1 rounded-lg transition-colors cursor-pointer">Rincian <i class="fas fa-arrow-right ml-1"></i></button>
              </div>
            </div>
          </div>`;
       }).join('');
     }
 
-    // --- FITUR DOWNLOAD EXCEL UNTUK TIPE DATA TERTENTU ---
     function downloadSingleExcel(category) {
       const selectedCols = getSelectedColumns();
       const data = globalData.filter(r => getCategoryValue(r, selectedCols) === category);
@@ -470,7 +477,6 @@
       addLog(`Mendownload file Excel lokal: ${filename}`, "text-green-400");
     }
 
-    // --- MODAL RINCIAN & PIVOT LENGKAP ---
     function openModal(category) {
       const selectedCols = getSelectedColumns();
       const data = globalData.filter(r => getCategoryValue(r, selectedCols) === category);
@@ -480,7 +486,6 @@
       
       document.getElementById('modalTitle').innerHTML = `<i class="fas fa-layer-group mr-3"></i> ${category} <span class="ml-3 text-xs bg-violet-500 text-white px-3 py-1 rounded-full shadow-lg">Total: ${data.length} Data</span>`;
       
-      // Tentukan Kolom Pivot Sub-Rincian (Mencari kolom yang belum dijadikan acuan utama)
       let subCol = headers.find(h => !selectedCols.includes(h) && (h.includes('KEC') || h.includes('KEL') || h.includes('NAMA') || h.includes('KAB') || h.includes('KOTA'))) || headers.find(h => !selectedCols.includes(h)) || headers[0];
       
       document.getElementById('modalBreakdownTitle').innerHTML = `<i class="fas fa-chart-pie mr-2"></i>Rincian Pivot per ${subCol} (Terurut Abjad):`;
@@ -491,7 +496,6 @@
         subGroup[val] = (subGroup[val] || 0) + 1;
       });
 
-      // Urutkan Pivot secara Abjad
       const sortedSubKeys = Object.keys(subGroup).sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
 
       document.getElementById('modalBreakdown').innerHTML = sortedSubKeys.map(sub => `
@@ -501,11 +505,9 @@
         </div>
       `).join('');
 
-      // Menyiapkan Action Tombol Download Excel di Modal
       const modalDlBtn = document.getElementById('modalDownloadBtn');
       modalDlBtn.onclick = () => downloadSingleExcel(category);
 
-      // Render Head & Body Table
       document.getElementById('modalTableHead').innerHTML = `<tr>${headers.map(h => `<th class="px-4 py-3 border-b border-white/10">${h}</th>`).join('')}</tr>`;
       
       const limitData = data.slice(0, 100);
@@ -520,17 +522,16 @@
       }
 
       const modal = document.getElementById('detailModal');
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
+      modal.classList.remove('modal-hidden');
+      modal.classList.add('modal-flex');
     }
 
     function closeModal() {
       const modal = document.getElementById('detailModal');
-      modal.classList.add('hidden');
-      modal.classList.remove('flex');
+      modal.classList.add('modal-hidden');
+      modal.classList.remove('modal-flex');
     }
 
-    // --- FORMAT EXCEL (AUTO-FIT KOLOM & AUTO-FILTER) ---
     function applyNeatExcelFormat(ws, dataToFormat) {
       if(!dataToFormat || dataToFormat.length === 0) return;
       const keys = Object.keys(dataToFormat[0]);
@@ -551,7 +552,6 @@
       ws['!autofilter'] = { ref: XLSX.utils.encode_range(range) };
     }
 
-    // --- PROSES & UPLOAD DRIVE / SPREADSHEET ---
     document.getElementById('processBtn').addEventListener('click', async function() {
       const selectedCols = getSelectedColumns();
       const selectedCats = Array.from(document.querySelectorAll('.cat-checkbox:checked')).map(cb => cb.value);
@@ -560,8 +560,8 @@
 
       const loader = document.getElementById('loaderOverlay');
       const loaderText = document.getElementById('loaderText');
-      loader.classList.remove('hidden');
-      loader.classList.add('flex');
+      loader.classList.remove('modal-hidden');
+      loader.classList.add('modal-flex');
       switchTab('log');
 
       const masterFolderName = originalFileName;
@@ -579,8 +579,8 @@
       };
 
       // A. Master File 
-      loaderText.innerText = "Membentuk File Master Keseluruhan yang Rapi...";
-      await new Promise(r => setTimeout(r, 100));
+      loaderText.innerText = "Membentuk File Master Keseluruhan...";
+      await new Promise(r => setTimeout(r, 50));
       try {
         const wsMaster = XLSX.utils.json_to_sheet(globalData);
         applyNeatExcelFormat(wsMaster, globalData); 
@@ -598,7 +598,7 @@
         const cat = selectedCats[i];
         loaderText.innerText = `Menyimpan Split: ${cat} (${i+1}/${selectedCats.length})...`;
         addLog(`[${i+1}/${selectedCats.length}] Mengirim ${cat} ke Drive...`, "text-blue-400");
-        await new Promise(r => setTimeout(r, 100));
+        await new Promise(r => setTimeout(r, 50));
 
         try {
           const filteredData = globalData.filter(r => getCategoryValue(r, selectedCols) === cat);
@@ -612,7 +612,7 @@
           const b64Str = XLSX.write(wb, { bookType: 'xlsx', type: 'base64' });
 
           const res = await sendToGAS({ action: 'saveExcel', base64Data: b64Str, fileName: `${safeCatName} - ${originalFileName}.xlsx`, subFolderName: masterFolderName });
-          if(res.status === 'success') addLog(`✓ Sukses Tersimpan di Drive: ${cat}`, "text-green-400");
+          if(res.status === 'success') addLog(`✓ Sukses Tersimpan: ${cat}`, "text-green-400");
         } catch (e) { addLog(`✗ Error Split: ${e.message}`, "text-red-400"); }
       }
 
@@ -628,15 +628,15 @@
           totalRows: globalData.length 
         });
         if (resLog.status === 'success') {
-          addLog("✓ Riwayat sukses terekam di Spreadsheet Auto Sempurna!", "text-green-400 font-bold");
+          addLog("✓ Riwayat sukses terekam di Spreadsheet!", "text-green-400 font-bold");
           fetchHistoryFromSpreadsheet();
         } else addLog(`✗ Spreadsheet Error: ${resLog.message}`, "text-red-400");
       } catch (e) { addLog(`✗ Gagal rekap riwayat: ${e.message}`, "text-red-400"); }
 
-      loader.classList.remove('flex');
-      loader.classList.add('hidden');
+      loader.classList.remove('modal-flex');
+      loader.classList.add('modal-hidden');
       addLog(`PROSES TUNTAS.`, "text-green-400 font-bold text-lg");
-      alert("Proses Selesai!\nData berhasil di-split multi-kategori (Drive) dan tercatat di Spreadsheet.");
+      alert("Proses Selesai!\nData berhasil di-split dan tercatat di Spreadsheet.");
     });
   </script>
 </body>
