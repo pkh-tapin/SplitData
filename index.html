@@ -39,7 +39,6 @@
     ::-webkit-scrollbar-thumb { background: rgba(139, 92, 246, 0.4); border-radius: 10px; }
     ::-webkit-scrollbar-thumb:hover { background: rgba(139, 92, 246, 0.8); }
     
-    /* CUSTOM HORIZONTAL SCROLLBAR UNTUK DESKTOP DRAG */
     .custom-x-scrollbar::-webkit-scrollbar { height: 8px; display: block; }
     .custom-x-scrollbar::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.2); border-radius: 10px; }
     .custom-x-scrollbar::-webkit-scrollbar-thumb { background: rgba(139, 92, 246, 0.4); border-radius: 10px; }
@@ -93,16 +92,15 @@
           </div>
         </div>
 
-        <!-- NEW: 5 CARD TERBARU DASHBOARD -->
         <div class="mb-8 border-t border-white/10 pt-6">
-          <label class="font-semibold text-slate-300 mb-4 block"><i class="fas fa-clock text-violet-400 mr-2"></i>5 Riwayat Eksekusi Split Terbaru (Klik untuk Rincian Kategori):</label>
+          <label class="font-semibold text-slate-300 mb-4 block"><i class="fas fa-clock text-violet-400 mr-2"></i>5 Riwayat Eksekusi Split Terbaru (Klik untuk Rincian Data Folder):</label>
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="dashboardHistoryContainer">
             <p class="text-slate-500 italic text-sm">Belum ada riwayat data tersimpan.</p>
           </div>
         </div>
         
         <div class="flex justify-between items-center mb-4">
-          <label class="font-semibold text-slate-300"><i class="fas fa-list-ul mr-2"></i>Rincian Kategori Data Aktif (Klik untuk Detail):</label>
+          <label class="font-semibold text-slate-300"><i class="fas fa-list-ul mr-2"></i>Rincian Kategori Data Aktif (Klik untuk Detail & Tabel):</label>
           <span class="text-xs text-slate-400 italic"><i class="fas fa-mouse-pointer mr-1"></i>Klik pada item untuk rincian & download</span>
         </div>
         <div id="rincianBox" class="bg-slate-800/50 rounded-2xl border border-white/5 p-4 max-h-96 overflow-y-auto space-y-2">
@@ -110,7 +108,7 @@
         </div>
       </div>
 
-      <!-- TAB 2: SPLIT DATA (MULTI-LEVEL SPLIT) -->
+      <!-- TAB 2: SPLIT DATA -->
       <div id="tab-split" class="tab-content animate-fade-in">
         <h2 class="text-2xl font-bold text-white mb-6 text-center tracking-wide"><i class="fas fa-folder-tree text-violet-500 mr-2"></i>Arsip & Eksekusi Split</h2>
         
@@ -126,7 +124,6 @@
           <p id="fileInfoLabel" class="text-violet-400 font-bold mt-2 text-sm hidden"></p>
         </div>
 
-        <!-- MULTI LEVEL SPLIT DROPDOWNS -->
         <div id="step2" class="mb-6 animate-fade-in hidden">
           <label class="font-semibold text-slate-300 mb-2 block">2. Pilih Acuan Pemisah (Hirarki Multi Level)</label>
           <p class="text-xs text-slate-400 mb-3">Pilih hingga 3 tingkatan acuan kolom (misal: Prov $\rightarrow$ Kab $\rightarrow$ Kec):</p>
@@ -174,24 +171,23 @@
           <button onclick="fetchHistoryFromSpreadsheet()" class="text-xs bg-slate-800 hover:bg-slate-700 text-white px-3 py-1 rounded border border-white/10 transition-colors"><i class="fas fa-sync-alt mr-1"></i> Refresh Drive</button>
         </div>
         
-        <!-- HORIZONTAL SCROLL ENABLED FOR DESKTOP VIA DRAG & CUSTOM SCROLLBAR -->
         <div class="flex overflow-x-auto custom-x-scrollbar gap-4 pb-4 mb-6 cursor-grab active:cursor-grabbing select-none" id="historyContainer">
           <p class="text-slate-500 italic text-sm"><i class="fas fa-spinner fa-spin mr-2"></i>Memuat folder dari Google Drive...</p>
         </div>
 
-        <!-- NEW: FULL TABLE FOR DRIVE HISTORY -->
+        <!-- FULL TABLE FOR DRIVE HISTORY -->
         <div class="mb-8">
-          <label class="font-semibold text-slate-300 block mb-3"><i class="fas fa-table text-violet-400 mr-2"></i>Tabel Lengkap Riwayat Database (Google Drive)</label>
+          <label class="font-semibold text-slate-300 block mb-3"><i class="fas fa-table text-violet-400 mr-2"></i>Tabel Lengkap Riwayat Database (Membaca Isi Folder Google Drive)</label>
           <div class="overflow-x-auto rounded-xl border border-white/10 bg-slate-900/40 max-h-72 overflow-y-auto custom-scrollbar shadow-inner">
             <table class="w-full text-xs text-left text-slate-300">
               <thead class="text-[11px] text-slate-400 uppercase bg-slate-900/95 sticky top-0 z-10 whitespace-nowrap shadow-md">
                 <tr>
                   <th class="px-4 py-4 border-b border-white/10">No</th>
-                  <th class="px-4 py-4 border-b border-white/10">Tanggal</th>
+                  <th class="px-4 py-4 border-b border-white/10">Tanggal Terformat</th>
                   <th class="px-4 py-4 border-b border-white/10 min-w-[200px]">Nama Folder / File Master</th>
                   <th class="px-4 py-4 border-b border-white/10">Acuan Split</th>
                   <th class="px-4 py-4 border-b border-white/10 text-center">Jml Data</th>
-                  <th class="px-4 py-4 border-b border-white/10 text-center">Aksi / Rincian</th>
+                  <th class="px-4 py-4 border-b border-white/10 text-center">Aksi / Rincian Folder</th>
                 </tr>
               </thead>
               <tbody id="historyTableBody" class="divide-y divide-white/5 whitespace-nowrap">
@@ -235,7 +231,7 @@
     </div>
   </div>
 
-  <!-- MODAL 1: DETAIL DATA LENGKAP (FILE AKTIF UNGGAHAN EXCEL) -->
+  <!-- MODAL 1: DETAIL DATA LENGKAP BISA DARI UPLOAD / DARI TARIKAN FILE DRIVE -->
   <div id="detailModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[100] hidden flex-col justify-center items-center px-4">
     <div class="bg-slate-800 border border-white/20 rounded-2xl w-full max-w-6xl max-h-[92vh] flex flex-col shadow-2xl animate-slide-up">
       <div class="p-5 border-b border-white/10 flex justify-between items-center bg-slate-900/50 rounded-t-2xl">
@@ -271,14 +267,14 @@
     </div>
   </div>
 
-  <!-- MODAL 2: DETAIL TABEL KHUSUS RIWAYAT GOOGLE DRIVE (BREAKDOWN KABUPATEN/KATEGORI FILE) -->
+  <!-- MODAL 2: DETAIL TABEL KHUSUS RIWAYAT GOOGLE DRIVE (TAMPILKAN FILE DAN TOMBOL BACA DATA) -->
   <div id="driveHistoryModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[105] hidden flex-col justify-center items-center px-4">
     <div class="bg-slate-800 border border-white/20 rounded-2xl w-full max-w-4xl max-h-[90vh] flex flex-col shadow-2xl animate-slide-up">
       
       <div class="p-5 border-b border-white/10 flex justify-between items-center bg-slate-900/50 rounded-t-2xl">
         <h3 id="driveModalTitle" class="text-lg font-bold text-emerald-400 flex items-center flex-wrap gap-2"></h3>
         <div class="flex items-center gap-2">
-          <a id="driveModalLink" href="#" target="_blank" class="bg-violet-600 hover:bg-violet-500 text-white text-xs font-bold px-4 py-2 rounded-xl transition-all flex items-center gap-2 shadow-lg">
+          <a id="driveModalLink" href="#" target="_blank" class="bg-emerald-600/20 hover:bg-emerald-600 text-emerald-400 hover:text-white text-xs font-bold px-4 py-2 rounded-xl transition-all flex items-center gap-2 shadow-lg">
             <i class="fas fa-folder-open"></i> Akses Drive Asli
           </a>
           <button onclick="closeDriveModal()" class="text-slate-400 hover:text-white transition-colors p-1"><i class="fas fa-times text-2xl"></i></button>
@@ -294,7 +290,7 @@
 
         <div>
           <h4 class="text-sm font-bold text-slate-300 mb-3 border-b border-white/5 pb-2 flex items-center justify-between">
-            <span><i class="fas fa-list-ol mr-2 text-violet-400"></i>Tabel Rincian Data Kategori (Isi Folder)</span>
+            <span><i class="fas fa-list-ol mr-2 text-violet-400"></i>Daftar File Split Kabupaten / Kategori (Klik untuk Baca Data)</span>
             <span id="driveModalBadge" class="text-xs bg-violet-500/20 text-violet-300 px-2.5 py-1 rounded-full font-mono font-bold"></span>
           </h4>
           
@@ -304,7 +300,7 @@
                 <tr>
                   <th class="px-4 py-3 border-b border-white/10 w-12 text-center">No</th>
                   <th class="px-4 py-3 border-b border-white/10">Nama Kategori / Rincian Wilayah</th>
-                  <th class="px-4 py-3 border-b border-white/10 text-center">Format Data</th>
+                  <th class="px-4 py-3 border-b border-white/10 text-center">Aksi (Sangat Cepat)</th>
                 </tr>
               </thead>
               <tbody id="driveModalTableBody" class="divide-y divide-white/5 whitespace-nowrap">
@@ -349,10 +345,24 @@
 
   <!-- SCRIPT LOGIKA UTAMA -->
   <script>
-    // --- HELPER: PEMBERSIH NAMA OTOMATIS (FORMAT CLEAN NAME) ---
+    // --- HELPER: PEMBERSIH NAMA & FORMAT TANGGAL CANTIK (DD MMMM YYYY) ---
     function cleanName(str) {
       if (!str) return '';
       return String(str).replace(/\b(KABUPATEN|KAB\.|KAB|KOTA|PROVINSI|PROV\.)\b/gi, '').replace(/\.xlsx/gi, '').replace(/\s+/g, ' ').trim();
+    }
+
+    function formatToIndoDate(dateStr) {
+      if (!dateStr) return "-";
+      try {
+        const months = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+        let d = new Date(dateStr);
+        if (isNaN(d.getTime())) {
+          const parts = dateStr.split(" ")[0].split("/");
+          if(parts.length === 3) d = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+          else return dateStr; 
+        }
+        return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+      } catch(e) { return dateStr; }
     }
 
     // --- CUSTOM MODERN NOTIFICATION SYSTEM ---
@@ -435,29 +445,23 @@
       e.preventDefault();
       isDraggingHorizontal = true;
       const x = e.pageX - historySlider.offsetLeft;
-      const walk = (x - startX) * 1.5; // Scroll speed
+      const walk = (x - startX) * 1.5;
       historySlider.scrollLeft = scrollLeft - walk;
     });
 
-    // Handle klik pada Card (Jika tidak sedang Drag)
     function handleHistoryCardClick(event, index) {
-      if (isDraggingHorizontal) {
-        event.preventDefault();
-        event.stopPropagation();
-        isDraggingHorizontal = false;
-        return;
-      }
+      if (isDraggingHorizontal) { event.preventDefault(); event.stopPropagation(); isDraggingHorizontal = false; return; }
       openDriveFolderModal(index);
     }
 
-    // --- BACA FOLDER GOOGLE DRIVE & SPREADSHEET LOG (TABEL LENGKAP & CARD) ---
+    // --- BACA FOLDER GOOGLE DRIVE & SPREADSHEET LOG (FORMAT TANGGAL DIRAPIKAN 100%) ---
     async function fetchHistoryFromSpreadsheet() {
       const container = document.getElementById('historyContainer');
       const dashContainer = document.getElementById('dashboardHistoryContainer');
       const tableBody = document.getElementById('historyTableBody');
       
       container.innerHTML = '<p class="text-slate-500 italic text-sm"><i class="fas fa-spinner fa-spin mr-2"></i>Mengambil folder dari Google Drive...</p>';
-      tableBody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-slate-500 italic">Memuat data dari sistem...</td></tr>';
+      tableBody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-slate-500 italic">Memuat data dari sistem...</td></tr>';
       
       try {
         const res = await fetch(GAS_API_URL, {
@@ -473,7 +477,9 @@
           let tableHtmlString = "";
 
           driveHistoryData.forEach((item, index) => {
+            const cleanDate = formatToIndoDate(item.date); // Perbaikan Tipe Tanggal ke Tipe Cantik
             const safeFolder = item.folderUrl || '#';
+            const driveBtnActive = item.folderUrl ? `href="${item.folderUrl}" target="_blank"` : `href="#" onclick="event.stopPropagation(); alert('URL Drive Belum Tersedia');"`;
             const safeName = cleanName(item.fileName);
             const displayAcuan = item.colName || 'Google Drive Directory';
             
@@ -481,14 +487,14 @@
             cardHtmlString += `
               <div onmouseup="handleHistoryCardClick(event, ${index})" class="min-w-[280px] max-w-[320px] bg-slate-800 border border-white/10 hover:border-violet-500 hover:shadow-[0_0_20px_rgba(107,70,193,0.3)] p-4 rounded-2xl shadow-lg flex-shrink-0 animate-fade-in transition-all group select-none">
                 <div class="flex justify-between items-center mb-3">
-                  <span class="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-1 rounded-full truncate max-w-[120px]" title="${item.date}"><i class="fas fa-cloud mr-1"></i> ${item.date.split(' ')[0]}</span>
-                  <a href="${safeFolder}" target="_blank" onclick="event.stopPropagation()" class="text-xs text-violet-400 hover:text-white font-bold bg-violet-500/10 hover:bg-violet-600 px-2 py-1 rounded-full transition-colors"><i class="fas fa-folder-open mr-1"></i>Drive</a>
+                  <span class="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-1 rounded-full truncate max-w-[120px]" title="${cleanDate}"><i class="fas fa-calendar-day mr-1"></i> ${cleanDate}</span>
+                  <a ${driveBtnActive} onclick="event.stopPropagation()" class="text-xs text-violet-400 hover:text-white font-bold bg-violet-500/10 hover:bg-violet-600 px-2 py-1 rounded-full transition-colors"><i class="fas fa-folder-open mr-1"></i>Drive</a>
                 </div>
                 <p class="text-white font-bold text-sm mb-1 truncate group-hover:text-violet-300 transition-colors" title="${safeName}">${safeName}</p>
                 <p class="text-slate-400 text-[11px] mb-3 truncate">Acuan: <span class="text-indigo-300">${displayAcuan}</span></p>
                 <div class="flex justify-between border-t border-white/5 pt-3">
-                  <span class="text-[11px] font-bold text-slate-300"><i class="fas fa-list-ol mr-1 text-slate-500"></i> ${item.totalRows} Data</span>
-                  <span class="text-[11px] font-bold text-slate-300"><i class="fas fa-folder mr-1 text-slate-500"></i> ${item.totalCats} File</span>
+                  <span class="text-[11px] font-bold text-slate-300"><i class="fas fa-list-ol mr-1 text-slate-500"></i> ${item.totalRows}</span>
+                  <span class="text-[11px] font-bold text-slate-300"><i class="fas fa-folder mr-1 text-slate-500"></i> ${item.totalCats} Kategori</span>
                 </div>
               </div>
             `;
@@ -497,26 +503,26 @@
             if(index < 5) {
               dashHtmlString += `
                 <div onclick="openDriveFolderModal(${index})" class="bg-slate-800/80 p-4 rounded-xl border border-white/10 hover:border-violet-500 hover:shadow-lg transition-all cursor-pointer group">
-                   <h3 class="font-bold text-white text-sm mb-2 truncate group-hover:text-violet-400" title="${safeName}"><i class="fas fa-folder-open text-violet-500 mr-2"></i>${safeName}</h3>
+                   <h3 class="font-bold text-white text-sm mb-2 truncate group-hover:text-violet-400" title="${safeName}"><i class="fas fa-folder-tree text-violet-500 mr-2"></i>${safeName}</h3>
                    <div class="flex justify-between items-center text-xs text-slate-400 border-t border-white/5 pt-2">
                      <span>${item.totalCats} Kategori File</span>
-                     <span class="text-violet-400 font-bold">${item.date.split(' ')[0]}</span>
+                     <span class="text-violet-400 font-bold">${cleanDate}</span>
                    </div>
                 </div>
               `;
             }
 
-            // 3. TABEL LENGKAP (DATABASE)
+            // 3. TABEL LENGKAP PENGHILANG TANDA "-"
             tableHtmlString += `
               <tr class="hover:bg-white/5 transition-colors">
                 <td class="px-4 py-3 border-b border-white/5 text-center text-slate-500">${index + 1}</td>
-                <td class="px-4 py-3 border-b border-white/5 text-[11px]">${item.date}</td>
+                <td class="px-4 py-3 border-b border-white/5 text-[11px] text-emerald-300 font-bold">${cleanDate}</td>
                 <td class="px-4 py-3 border-b border-white/5 font-bold text-white truncate max-w-[250px]" title="${safeName}">${safeName}</td>
                 <td class="px-4 py-3 border-b border-white/5 text-[11px] text-indigo-300">${displayAcuan}</td>
                 <td class="px-4 py-3 border-b border-white/5 text-center font-bold text-violet-400 bg-violet-500/5">${item.totalCats} File</td>
                 <td class="px-4 py-3 border-b border-white/5 text-center">
                   <button onclick="openDriveFolderModal(${index})" class="bg-slate-700 hover:bg-slate-600 text-white text-[11px] font-bold px-3 py-1.5 rounded-lg transition-colors mr-2 shadow-sm"><i class="fas fa-search mr-1"></i> Rincian</button>
-                  ${item.folderUrl ? `<a href="${item.folderUrl}" target="_blank" class="bg-emerald-600/20 hover:bg-emerald-600 text-emerald-400 hover:text-white text-[11px] font-bold px-3 py-1.5 rounded-lg transition-colors shadow-sm"><i class="fas fa-link mr-1"></i> Drive</a>` : '-'}
+                  ${item.folderUrl ? `<a href="${item.folderUrl}" target="_blank" class="bg-emerald-600/20 hover:bg-emerald-600 text-emerald-400 hover:text-white text-[11px] font-bold px-3 py-1.5 rounded-lg transition-colors shadow-sm"><i class="fas fa-link mr-1"></i> Drive Asli</a>` : '-'}
                 </td>
               </tr>
             `;
@@ -529,40 +535,39 @@
         } else {
           const empty = '<p class="text-slate-500 italic text-sm">Belum ada riwayat tersimpan.</p>';
           container.innerHTML = empty; dashContainer.innerHTML = empty;
-          tableBody.innerHTML = '<tr><td colspan="7" class="text-center py-6 text-slate-500">Tidak ada riwayat database.</td></tr>';
+          tableBody.innerHTML = '<tr><td colspan="6" class="text-center py-6 text-slate-500">Tidak ada riwayat database.</td></tr>';
         }
       } catch (error) {
         container.innerHTML = `<p class="text-red-400 italic text-sm">Gagal memuat riwayat: Pastikan URL GAS benar.</p>`;
       }
     }
 
-    // --- MODAL RINCIAN KHUSUS FOLDER GOOGLE DRIVE (TABEL PER KABUPATEN/KATEGORI) ---
+    // --- MODAL RINCIAN KHUSUS FOLDER GOOGLE DRIVE DENGAN TOMBOL BACA EXCEL ---
     function openDriveFolderModal(index) {
       const item = driveHistoryData[index];
       if (!item) return;
 
       const safeName = item.fileName.replace(/"/g, '&quot;');
       document.getElementById('driveModalTitle').innerHTML = `<i class="fas fa-folder-tree text-emerald-400"></i> <span class="text-white">${safeName}</span>`;
-      document.getElementById('driveModalDate').innerText = item.date;
+      document.getElementById('driveModalDate').innerText = formatToIndoDate(item.date);
       document.getElementById('driveModalAcuan').innerText = item.colName || 'Google Drive Master';
       document.getElementById('driveModalSource').innerText = item.source || 'Drive Scan';
       document.getElementById('driveModalBadge').innerText = `Total ${item.totalCats} Kategori File`;
 
       const linkBtn = document.getElementById('driveModalLink');
-      if(item.folderUrl) {
-        linkBtn.href = item.folderUrl;
-        linkBtn.style.display = 'flex';
-      } else {
-        linkBtn.style.display = 'none';
-      }
+      if(item.folderUrl) { linkBtn.href = item.folderUrl; linkBtn.style.display = 'flex'; } 
+      else { linkBtn.style.display = 'none'; }
 
       const tableBody = document.getElementById('driveModalTableBody');
       if (item.fileList && item.fileList.length > 0) {
+        // Tampilkan tombol BACA DATA untuk setiap file di dalam folder tsb
         tableBody.innerHTML = item.fileList.map((f, i) => `
           <tr class="hover:bg-white/5 transition-colors">
             <td class="px-4 py-2 border-b border-white/5 text-center font-mono text-slate-500">${i+1}</td>
-            <td class="px-4 py-2 border-b border-white/5 font-bold text-slate-200"><i class="fas fa-file-excel text-violet-400 mr-2 text-[10px]"></i> ${cleanName(f)}</td>
-            <td class="px-4 py-2 border-b border-white/5 text-center text-[10px] text-slate-400 bg-slate-900/50">File Excel (.xlsx)</td>
+            <td class="px-4 py-2 border-b border-white/5 font-bold text-slate-200"><i class="fas fa-file-excel text-violet-400 mr-2 text-[10px]"></i> ${cleanName(f.name || f)}</td>
+            <td class="px-4 py-2 border-b border-white/5 text-center">
+              ${f.id ? `<button onclick="fetchAndViewDriveFile('${f.id}', '${cleanName(f.name)}')" class="bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white text-[11px] font-bold px-4 py-2 rounded-lg transition-all shadow-sm whitespace-nowrap"><i class="fas fa-bolt mr-1 text-yellow-300"></i> Klik Baca Data & Tabel Lengkap</button>` : `<span class="text-[10px] text-slate-500 italic">Hanya Riwayat Teks</span>`}
+            </td>
           </tr>
         `).join('');
       } else {
@@ -578,9 +583,64 @@
       modal.classList.add('hidden'); modal.classList.remove('flex');
     }
 
+    // --- FUNGSI SUPER CEPAT (TANPA LOADING LAMA): BACA DATA EXCEL DARI GOOGLE DRIVE VIA BASE64 ---
+    async function fetchAndViewDriveFile(fileId, fileName) {
+      const loader = document.getElementById('loaderOverlay');
+      const loaderText = document.getElementById('loaderText');
+      const progressBar = document.getElementById('loaderProgressBar');
+      
+      loaderText.innerText = "Membaca baris data langsung dari Google Drive (Kecepatan Tinggi)...";
+      progressBar.style.width = '40%';
+      loader.classList.remove('hidden'); loader.classList.add('flex');
+
+      try {
+        const res = await fetch(GAS_API_URL, {
+          method: 'POST', body: JSON.stringify({ action: 'getFileData', fileId: fileId }), headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+        });
+        const result = await res.json();
+        
+        if(result.status === 'success') {
+          progressBar.style.width = '85%';
+          
+          // SheetJS parse base64 directly secara instan
+          const workbook = XLSX.read(result.base64, { type: 'base64' });
+          const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+          const data = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
+          
+          if(data.length > 0) {
+            currentModalCatName = fileName;
+            currentModalData = data; 
+            currentModalFilteredData = [...data];
+            const headers = Object.keys(data[0] || {});
+            
+            document.getElementById('modalTitle').innerHTML = `<i class="fas fa-file-excel text-violet-400"></i> <span>${fileName}</span>`;
+            document.getElementById('modalStatBadge').innerText = `Total Data File Ini: ${data.length} Baris`;
+            document.getElementById('modalSearchInput').value = "";
+
+            renderModalMultiBreakdown(data, headers);
+            renderModalTableRows(data, headers);
+
+            // Tutup daftar file, Munculkan Tabel Excelnya!
+            closeDriveModal();
+            const detailModal = document.getElementById('detailModal');
+            detailModal.classList.remove('hidden'); detailModal.classList.add('flex');
+          } else {
+             showModernAlert("Kosong", "File Excel ini tidak memiliki baris data apapun di dalamnya.", false);
+          }
+        } else {
+          showModernAlert("Gagal", "Gagal mengunduh dan membaca file dari Drive.", false);
+        }
+      } catch (err) {
+        showModernAlert("Error API", err.message, false);
+      }
+      
+      progressBar.style.width = '100%';
+      setTimeout(() => { loader.classList.remove('flex'); loader.classList.add('hidden'); }, 300);
+    }
+
     document.addEventListener("DOMContentLoaded", fetchHistoryFromSpreadsheet);
 
-    // --- BACA FILE EXCEL & LANGSUNG TAMPILKAN DI DATABASE ---
+    // --- BACA FILE EXCEL LOKAL & LANGSUNG TAMPILKAN DI DATABASE ---
     document.getElementById('fileUpload').addEventListener('change', function(e) {
       const file = e.target.files[0];
       if (!file) return;
@@ -767,7 +827,7 @@
       const headers = Object.keys(currentModalData[0] || {});
       
       document.getElementById('modalTitle').innerHTML = `<i class="fas fa-layer-group text-violet-400"></i> <span>${category}</span>`;
-      document.getElementById('modalStatBadge').innerText = `Total ${currentModalData.length} Baris Data`;
+      document.getElementById('modalStatBadge').innerText = `Total Data File Ini: ${currentModalData.length} Baris`;
       document.getElementById('modalSearchInput').value = "";
 
       renderModalMultiBreakdown(currentModalData, headers);
@@ -803,7 +863,7 @@
     }
 
     function renderModalTableRows(data, headers) {
-      document.getElementById('modalRowCountLabel').innerText = `${data.length} Baris Data (1 - ${data.length})`;
+      document.getElementById('modalRowCountLabel').innerText = `${data.length} Baris Data Keseluruhan (1 - ${data.length})`;
       let thHtml = `<th class="px-3 py-3 border-b border-white/10 text-center w-12">No</th>`;
       headers.forEach(h => { thHtml += `<th class="px-4 py-3 border-b border-white/10">${h}</th>`; });
       document.getElementById('modalTableHead').innerHTML = `<tr>${thHtml}</tr>`;
