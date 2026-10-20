@@ -94,7 +94,7 @@
         </div>
       </div>
 
-      <!-- TAB 2: SPLIT DATA (MULTI-LEVEL SPLIT) -->
+      <!-- TAB 2: SPLIT DATA -->
       <div id="tab-split" class="tab-content animate-fade-in">
         <h2 class="text-2xl font-bold text-white mb-6 text-center tracking-wide"><i class="fas fa-folder-tree text-violet-500 mr-2"></i>Arsip & Eksekusi Split</h2>
         
@@ -145,20 +145,20 @@
         </div>
 
         <button id="processBtn" class="hidden w-full bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 text-white font-bold py-4 rounded-xl shadow-[0_0_25px_rgba(107,70,193,0.4)] transition-all flex justify-center items-center gap-3">
-          <i class="fas fa-rocket"></i> Proses & Sinkronisasi
+          <i class="fas fa-rocket"></i> Proses & Sinkronisasi Drive
         </button>
       </div>
 
       <!-- TAB 3: DATABASE & RIWAYAT -->
       <div id="tab-database" class="tab-content animate-fade-in">
-        <h2 class="text-2xl font-bold text-white mb-6 text-center tracking-wide"><i class="fas fa-database text-violet-500 mr-2"></i>Database & Riwayat</h2>
+        <h2 class="text-2xl font-bold text-white mb-6 text-center tracking-wide"><i class="fas fa-database text-violet-500 mr-2"></i>Database & Riwayat Google Drive</h2>
 
         <div class="flex justify-between items-center mb-3">
-          <label class="font-semibold text-slate-300"><i class="fas fa-history mr-2"></i>Riwayat Eksekusi (Dari Spreadsheet)</label>
-          <button onclick="fetchHistoryFromSpreadsheet()" class="text-xs bg-slate-800 hover:bg-slate-700 text-white px-3 py-1 rounded border border-white/10 transition-colors"><i class="fas fa-sync-alt mr-1"></i> Refresh</button>
+          <label class="font-semibold text-slate-300"><i class="fas fa-history mr-2"></i>Riwayat Folder Google Drive & Spreadsheet</label>
+          <button onclick="fetchHistoryFromSpreadsheet()" class="text-xs bg-slate-800 hover:bg-slate-700 text-white px-3 py-1 rounded border border-white/10 transition-colors"><i class="fas fa-sync-alt mr-1"></i> Refresh Drive</button>
         </div>
         <div class="flex overflow-x-auto no-scrollbar gap-4 pb-4 mb-6" id="historyContainer">
-          <p class="text-slate-500 italic text-sm"><i class="fas fa-spinner fa-spin mr-2"></i>Memuat riwayat dari Google Spreadsheet...</p>
+          <p class="text-slate-500 italic text-sm"><i class="fas fa-spinner fa-spin mr-2"></i>Memuat folder dari Google Drive...</p>
         </div>
 
         <hr class="border-white/10 mb-6">
@@ -177,7 +177,7 @@
 
         <div id="dbDataContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 max-h-[500px] overflow-y-auto pr-2 pb-4">
           <div class="col-span-full text-center text-slate-500 py-10 bg-slate-800/30 rounded-xl border border-white/5">
-            Silakan unggah database di menu Split terlebih dahulu.
+            Silakan unggah database di menu Split atau klik salah satu Folder Drive di atas.
           </div>
         </div>
       </div>
@@ -195,7 +195,7 @@
     </div>
   </div>
 
-  <!-- MODAL DETAIL DATA LENGKAP & TERPERINCI -->
+  <!-- MODAL DETAIL DATA LENGKAP -->
   <div id="detailModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[100] hidden flex-col justify-center items-center px-4">
     <div class="bg-slate-800 border border-white/20 rounded-2xl w-full max-w-6xl max-h-[92vh] flex flex-col shadow-2xl animate-slide-up">
       
@@ -213,7 +213,7 @@
       <!-- BODY MODAL -->
       <div class="p-6 overflow-y-auto flex-1 custom-scrollbar space-y-6">
         
-        <!-- RINGKASAN REKAP DEMOGRAFI WILAYAH (MISAL TAPIN 10, HSS 10) -->
+        <!-- RINGKASAN REKAP DEMOGRAFI WILAYAH -->
         <div>
           <h4 class="text-sm font-bold text-slate-300 mb-3 border-b border-white/5 pb-2 flex items-center justify-between">
             <span><i class="fas fa-chart-pie mr-2 text-violet-400"></i>Ringkasan Rincian Wilayah & Demografi</span>
@@ -260,7 +260,7 @@
     </div>
   </div>
 
-  <!-- CUSTOM ALERT / NOTIFIKASI MODAL MODERN (REPLACING NATIVE ALERT) -->
+  <!-- CUSTOM ALERT / NOTIFIKASI MODAL MODERN -->
   <div id="customAlertModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[120] hidden flex justify-center items-center px-4 animate-fade-in">
     <div class="bg-slate-800 border border-violet-500/30 rounded-3xl p-6 md:p-8 max-w-md w-full text-center shadow-[0_0_50px_rgba(139,92,246,0.3)] transform transition-all animate-slide-up">
       <div id="customAlertIcon" class="w-20 h-20 bg-gradient-to-tr from-emerald-500 to-teal-400 rounded-full flex items-center justify-center mx-auto mb-5 shadow-lg shadow-emerald-500/30">
@@ -330,6 +330,7 @@
     let currentModalData = [];
     let currentModalFilteredData = [];
     let currentModalCatName = "";
+    let driveHistoryData = [];
     const logBox = document.getElementById('logBox');
 
     function addLog(msg, colorClass = "text-blue-400") {
@@ -350,14 +351,14 @@
 
     function getRowGroupKey(row) {
       const cols = getSelectedColumns();
-      if (cols.length === 0) return "Uncategorized";
+      if (cols.length === 0) return `${cleanName(originalFileName)} (Data Master)`;
       return cols.map(c => cleanName(row[c]) || "N/A").join(" - ");
     }
 
-    // --- FETCH HISTORY FROM SPREADSHEET ---
+    // --- BACA FOLDER GOOGLE DRIVE & SPREADSHEET LOG ---
     async function fetchHistoryFromSpreadsheet() {
       const container = document.getElementById('historyContainer');
-      container.innerHTML = '<p class="text-slate-500 italic text-sm"><i class="fas fa-spinner fa-spin mr-2"></i>Mengambil data dari Spreadsheet...</p>';
+      container.innerHTML = '<p class="text-slate-500 italic text-sm"><i class="fas fa-spinner fa-spin mr-2"></i>Mengambil folder dari Google Drive...</p>';
       
       try {
         const res = await fetch(GAS_API_URL, {
@@ -366,32 +367,24 @@
         const result = await res.json();
         
         if (result.status === 'success' && result.data && result.data.length > 0) {
-          const historyData = result.data.reverse().slice(0, 15);
+          driveHistoryData = result.data.reverse();
           
           let htmlString = "";
-          historyData.forEach(item => {
+          driveHistoryData.forEach((item, index) => {
             const safeFolder = item.folderUrl || '';
-            const driveHtml = safeFolder ? `<a href="${safeFolder}" target="_blank" onclick="event.stopPropagation()" class="text-xs text-violet-400 hover:text-violet-300 font-bold"><i class="fas fa-folder-open mr-1"></i>Drive</a>` : '';
+            const driveHtml = safeFolder ? `<a href="${safeFolder}" target="_blank" onclick="event.stopPropagation()" class="text-xs text-violet-400 hover:text-violet-300 font-bold bg-violet-500/10 px-2 py-1 rounded-full"><i class="fas fa-folder-open mr-1"></i>Drive</a>` : '';
             
-            const safeDate = String(item.date).replace(/"/g, '&quot;');
-            const safeName = cleanName(item.fileName).replace(/"/g, '&quot;');
-            const safeColName = String(item.colName).replace(/"/g, '&quot;');
+            const safeName = cleanName(item.fileName);
             
             htmlString += `
               <div 
-                data-date="${safeDate}"
-                data-filename="${safeName}"
-                data-colname="${safeColName}"
-                data-cats="${item.totalCats}"
-                data-rows="${item.totalRows}"
-                data-folder="${safeFolder}"
-                onclick="showHistoryDetail(this.dataset.date, this.dataset.filename, this.dataset.colname, this.dataset.cats, this.dataset.rows, this.dataset.folder)"
-                class="min-w-[280px] bg-slate-800 border border-white/10 hover:border-violet-500/50 p-4 rounded-2xl shadow-lg flex-shrink-0 animate-fade-in cursor-pointer transition-all hover:-translate-y-1 group">
+                onclick="openDriveFolderModal(${index})"
+                class="min-w-[280px] bg-slate-800 border border-white/10 hover:border-violet-500 hover:shadow-[0_0_20px_rgba(107,70,193,0.3)] p-4 rounded-2xl shadow-lg flex-shrink-0 animate-fade-in cursor-pointer transition-all hover:-translate-y-1 group">
                 <div class="flex justify-between items-center mb-3">
                   <span class="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-1 rounded-full"><i class="fas fa-cloud-download-alt mr-1"></i> ${item.date}</span>
                   ${driveHtml}
                 </div>
-                <p class="text-white font-bold text-sm mb-1 truncate group-hover:text-violet-300 transition-colors" title="${safeName}">${item.fileName}</p>
+                <p class="text-white font-bold text-sm mb-1 truncate group-hover:text-violet-300 transition-colors" title="${safeName}">${safeName}</p>
                 <p class="text-slate-400 text-xs mb-3">Acuan: <span class="text-indigo-300">${item.colName}</span></p>
                 <div class="flex justify-between border-t border-white/5 pt-3">
                   <span class="text-xs font-bold text-slate-300"><i class="fas fa-list-ol mr-1"></i> ${item.totalRows} Baris</span>
@@ -402,24 +395,47 @@
           });
           container.innerHTML = htmlString;
         } else {
-          container.innerHTML = '<p class="text-slate-500 italic text-sm">Spreadsheet aktif, namun belum ada riwayat tersimpan.</p>';
+          container.innerHTML = '<p class="text-slate-500 italic text-sm">Belum ada folder tersimpan di Drive.</p>';
         }
       } catch (error) {
         container.innerHTML = `<p class="text-red-400 italic text-sm">Gagal memuat riwayat: Pastikan URL GAS benar.</p>`;
       }
     }
 
-    function showHistoryDetail(date, fileName, colName, totalCats, totalRows, folderUrl) {
-      const driveMsg = folderUrl ? `\n\nLink Folder Drive:\n${folderUrl}` : '';
+    // MODAL RINCIAN FOLDER GOOGLE DRIVE
+    function openDriveFolderModal(index) {
+      const item = driveHistoryData[index];
+      if (!item) return;
+
+      const safeName = cleanName(item.fileName);
+      const driveMsg = item.folderUrl ? `<a href="${item.folderUrl}" target="_blank" class="inline-flex items-center gap-2 bg-violet-600 hover:bg-violet-500 text-white text-xs font-bold px-4 py-2 rounded-xl transition-all shadow-lg"><i class="fas fa-folder-open"></i> Buka Folder di Google Drive</a>` : '';
+
+      let fileListHtml = "";
+      if (item.fileList && item.fileList.length > 0) {
+        fileListHtml = `
+          <div class="bg-slate-900/80 p-4 rounded-xl border border-white/10 mb-4">
+            <h5 class="text-xs font-bold text-violet-300 mb-2"><i class="fas fa-file-excel mr-2"></i>Daftar File Split di Dalam Folder Ini:</h5>
+            <div class="space-y-1 max-h-40 overflow-y-auto pr-2">
+              ${item.fileList.map((f, i) => `<div class="text-xs text-slate-300 py-1 border-b border-white/5 flex items-center gap-2"><span class="text-slate-500 font-mono text-[10px]">${i+1}.</span> <i class="fas fa-file-alt text-violet-400 text-[10px]"></i> ${cleanName(f)}</div>`).join('')}
+            </div>
+          </div>
+        `;
+      }
+
       showModernAlert(
-        "Detail Riwayat Eksekusi",
-        `• Tanggal: ${date}\n• File Master: ${fileName}\n• Acuan Pemisah: ${colName}\n• Total Kategori: ${totalCats} File\n• Total Baris Data: ${totalRows} Baris${driveMsg}`
+        `📁 ${safeName}`,
+        `• Tanggal Sync: ${item.date}\n• Acuan Pemisah: ${item.colName}\n• Total File Split: ${item.totalCats} File\n• Total Data: ${item.totalRows} Baris\n• Sumber Data: ${item.source || 'Google Drive'}`
       );
+
+      if (item.folderUrl) {
+        const msgContainer = document.getElementById('customAlertMsg');
+        msgContainer.innerHTML += `<div class="mt-4 pt-3 border-t border-white/10 flex justify-center">${driveMsg}</div>`;
+      }
     }
 
     document.addEventListener("DOMContentLoaded", fetchHistoryFromSpreadsheet);
 
-    // --- READ EXCEL FILE ---
+    // --- BACA FILE EXCEL & LANGSUNG TAMPILKAN DI DATABASE ---
     document.getElementById('fileUpload').addEventListener('change', function(e) {
       const file = e.target.files[0];
       if (!file) return;
@@ -460,13 +476,11 @@
             document.getElementById('processBtn').classList.add('hidden');
             document.getElementById('processBtn').classList.remove('flex');
             
-            document.getElementById('dashRows').innerText = globalData.length;
-            document.getElementById('dashCols').innerText = headers.length;
-            document.getElementById('dashCats').innerText = "0";
-            document.getElementById('rincianBox').innerHTML = '<p class="text-center text-slate-500 py-8">Silakan pilih acuan pemisah di tab Split.</p>';
-            document.getElementById('dbDataContainer').innerHTML = '<div class="col-span-full text-center text-slate-500 py-10 bg-slate-800/30 rounded-xl border border-white/5">Menunggu pemilihan acuan pemisah...</div>';
+            // Render langsung ke Dashboard & Database
+            updateDashboard();
+            renderDataCards();
             
-            addLog(`Sukses membaca ${globalData.length} baris data. Menunggu instruksi pemisah.`, "text-green-400 font-bold");
+            addLog(`Sukses membaca ${globalData.length} baris data. Master Data Keseluruhan siap dilihat & diklik di menu Database.`, "text-green-400 font-bold");
           }
         } catch (err) { addLog(`Error parsing file: ${err.message}`, "text-red-400"); }
       };
@@ -615,7 +629,7 @@
       let categories = Object.keys(grouped).sort();
       if (filterVal) categories = categories.filter(c => c.toLowerCase().includes(filterVal));
 
-      document.getElementById('dataCountLabel').innerText = `${categories.length} Kategori`;
+      document.getElementById('dataCountLabel').innerText = `${categories.length} Kategori Data`;
 
       if(categories.length === 0) {
          container.innerHTML = `<div class="col-span-full text-center text-slate-500 py-10 bg-slate-800/30 rounded-xl border border-white/5">Kategori tidak ditemukan.</div>`;
@@ -667,7 +681,7 @@
       modal.classList.add('flex');
     }
 
-    // Breakdown statistik terperinci (misal Tapin 10, HSS 10)
+    // Breakdown statistik terperinci
     function renderModalMultiBreakdown(data, headers) {
       const selectedCols = getSelectedColumns();
       const availableCols = headers.filter(h => !selectedCols.includes(h));
@@ -699,7 +713,7 @@
         card.className = "bg-slate-900/80 p-3.5 rounded-xl border border-white/10 shadow-inner";
         
         let listHtml = Object.keys(counts).sort().map(k => `
-          <div class="flex justify-between items-center text-xs py-1.5 border-b border-white/5 last:border-0">
+          <div class="flex justify-between items-center text-xs py-1.5 border-b border-white/5 last:border-0 hover:bg-white/5 px-1 rounded transition-colors">
             <span class="text-slate-300 truncate pr-2 font-medium" title="${k}">${k}</span>
             <span class="text-violet-300 font-bold bg-violet-500/20 px-2 py-0.5 rounded text-[11px]">${counts[k]} Data</span>
           </div>
@@ -717,7 +731,7 @@
       });
     }
 
-    // Render tabel data lengkap tanpa pemotongan
+    // Render tabel data lengkap 100% tanpa batas
     function renderModalTableRows(data, headers) {
       document.getElementById('modalRowCountLabel').innerText = `${data.length} Baris Data (1 - ${data.length})`;
 
@@ -764,7 +778,7 @@
       XLSX.utils.book_append_sheet(wb, ws, "Data");
       
       const safeName = currentModalCatName.replace(/[/\\?%*:|"<>]/g, '-');
-      XLSX.writeFile(wb, `${safeName} - ${originalFileName || 'Export'}.xlsx`);
+      XLSX.writeFile(wb, `${safeName}.xlsx`);
     }
 
     function closeModal() {
@@ -794,7 +808,7 @@
       ws['!autofilter'] = { ref: XLSX.utils.encode_range(range) };
     }
 
-    // --- PROSES & UPLOAD DRIVE / SPREADSHEET (DENGAN PROGRESS ANIMASI & NOTIF MODERN) ---
+    // --- PROSES & UPLOAD DRIVE / SPREADSHEET ---
     document.getElementById('processBtn').addEventListener('click', async function() {
       const selectedCols = getSelectedColumns();
       const selectedCats = Array.from(document.querySelectorAll('.cat-checkbox:checked')).map(cb => cb.value);
@@ -904,7 +918,6 @@
       loader.classList.add('hidden');
       addLog(`PROSES TUNTAS.`, "text-green-400 font-bold text-lg");
 
-      // TAMPILKAN NOTIFIKASI MODERN SELESAI
       showModernAlert(
         "Proses Split Berhasil!", 
         `Data (${masterFolderName}) telah berhasil di-split sebanyak ${selectedCats.length} file kategori secara rapi ke Google Drive dan tercatat di Spreadsheet.`
