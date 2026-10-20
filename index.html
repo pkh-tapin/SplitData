@@ -24,7 +24,7 @@
       }
     }
 
-    // [BLUEPRINT LOCKED] 🔴 GANTI DENGAN URL WEB APP GOOGLE APPS SCRIPT ANDA
+    // 🔴 GANTI DENGAN URL WEB APP GOOGLE APPS SCRIPT ANDA
     const GAS_API_URL = "https://script.google.com/macros/s/AKfycbw5bQE3OyQ8LE64Vdu3XgP3kBEmRAJtyajI9L21uY6bxYa9hvpbrENEJiItF6IBoA6YxQ/exec";
   </script>
 
@@ -270,7 +270,7 @@
       return cols.map(c => row[c] || "N/A").join(" - ");
     }
 
-    // --- READ EXECUTION HISTORY FROM SPREADSHEET VIA GAS ---
+    // --- READ EXECUTION HISTORY DARI GAS (DIPERBAIKI ANTI SYNTAX-ERROR) ---
     async function fetchHistoryFromSpreadsheet() {
       const container = document.getElementById('historyContainer');
       container.innerHTML = '<p class="text-slate-500 italic text-sm"><i class="fas fa-spinner fa-spin mr-2"></i>Mengambil data dari Spreadsheet...</p>';
@@ -283,20 +283,41 @@
         
         if (result.status === 'success' && result.data && result.data.length > 0) {
           const historyData = result.data.reverse().slice(0, 15);
-          container.innerHTML = historyData.map(item => `
-            <div onclick="showHistoryDetail('${item.date}', '${item.fileName.replace(/'/g, "\\'")}', '${item.colName}', '${item.totalCats}', '${item.totalRows}', '${item.folderUrl || ''}')" class="min-w-[280px] bg-slate-800 border border-white/10 hover:border-violet-500/50 p-4 rounded-2xl shadow-lg flex-shrink-0 animate-fade-in cursor-pointer transition-all hover:-translate-y-1 group">
-              <div class="flex justify-between items-center mb-3">
-                <span class="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-1 rounded-full"><i class="fas fa-cloud-download-alt mr-1"></i> ${item.date}</span>
-                ${item.folderUrl ? `<a href="${item.folderUrl}" target="_blank" onclick="event.stopPropagation()" class="text-xs text-violet-400 hover:text-violet-300 font-bold"><i class="fas fa-folder-open mr-1"></i>Drive</a>` : ''}
+          
+          let htmlString = "";
+          historyData.forEach(item => {
+            const safeFolder = item.folderUrl || '';
+            const driveHtml = safeFolder ? `<a href="${safeFolder}" target="_blank" onclick="event.stopPropagation()" class="text-xs text-violet-400 hover:text-violet-300 font-bold"><i class="fas fa-folder-open mr-1"></i>Drive</a>` : '';
+            
+            // Pengamanan karakter ganda agar aman saat disematkan ke dalam atribut HTML data-*
+            const safeDate = String(item.date).replace(/"/g, '&quot;');
+            const safeName = String(item.fileName).replace(/"/g, '&quot;');
+            const safeColName = String(item.colName).replace(/"/g, '&quot;');
+            
+            htmlString += `
+              <div 
+                data-date="${safeDate}"
+                data-filename="${safeName}"
+                data-colname="${safeColName}"
+                data-cats="${item.totalCats}"
+                data-rows="${item.totalRows}"
+                data-folder="${safeFolder}"
+                onclick="showHistoryDetail(this.dataset.date, this.dataset.filename, this.dataset.colname, this.dataset.cats, this.dataset.rows, this.dataset.folder)"
+                class="min-w-[280px] bg-slate-800 border border-white/10 hover:border-violet-500/50 p-4 rounded-2xl shadow-lg flex-shrink-0 animate-fade-in cursor-pointer transition-all hover:-translate-y-1 group">
+                <div class="flex justify-between items-center mb-3">
+                  <span class="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-1 rounded-full"><i class="fas fa-cloud-download-alt mr-1"></i> ${item.date}</span>
+                  ${driveHtml}
+                </div>
+                <p class="text-white font-bold text-sm mb-1 truncate group-hover:text-violet-300 transition-colors" title="${safeName}">${item.fileName}</p>
+                <p class="text-slate-400 text-xs mb-3">Acuan: <span class="text-indigo-300">${item.colName}</span></p>
+                <div class="flex justify-between border-t border-white/5 pt-3">
+                  <span class="text-xs font-bold text-slate-300"><i class="fas fa-list-ol mr-1"></i> ${item.totalRows} Baris</span>
+                  <span class="text-xs font-bold text-slate-300"><i class="fas fa-folder mr-1"></i> ${item.totalCats} File</span>
+                </div>
               </div>
-              <p class="text-white font-bold text-sm mb-1 truncate group-hover:text-violet-300 transition-colors" title="${item.fileName}">${item.fileName}</p>
-              <p class="text-slate-400 text-xs mb-3">Acuan: <span class="text-indigo-300">${item.colName}</span></p>
-              <div class="flex justify-between border-t border-white/5 pt-3">
-                <span class="text-xs font-bold text-slate-300"><i class="fas fa-list-ol mr-1"></i> ${item.totalRows} Baris</span>
-                <span class="text-xs font-bold text-slate-300"><i class="fas fa-folder mr-1"></i> ${item.totalCats} File</span>
-              </div>
-            </div>
-          `).join('');
+            `;
+          });
+          container.innerHTML = htmlString;
         } else {
           container.innerHTML = '<p class="text-slate-500 italic text-sm">Spreadsheet aktif, namun belum ada riwayat tersimpan.</p>';
         }
@@ -306,7 +327,8 @@
     }
 
     function showHistoryDetail(date, fileName, colName, totalCats, totalRows, folderUrl) {
-      alert(`📌 DETAIL RIWAYAT EKSEKUSI:\n\n• Tanggal: ${date}\n• File Master: ${fileName}\n• Acuan Pemisah: ${colName}\n• Total Kategori File: ${totalCats}\n• Total Baris Data: ${totalRows}\n\n${folderUrl ? 'Link Folder Drive: ' + folderUrl : ''}`);
+      const driveMsg = folderUrl ? '\n\nLink Folder Drive: ' + folderUrl : '';
+      alert(`📌 DETAIL RIWAYAT EKSEKUSI:\n\n• Tanggal: ${date}\n• File Master: ${fileName}\n• Acuan Pemisah: ${colName}\n• Total Kategori File: ${totalCats}\n• Total Baris Data: ${totalRows}${driveMsg}`);
     }
 
     document.addEventListener("DOMContentLoaded", fetchHistoryFromSpreadsheet);
@@ -401,11 +423,10 @@
 
       const rincianBox = document.getElementById('rincianBox');
       const checklistContainer = document.getElementById('checklistContainer');
-      rincianBox.innerHTML = ''; checklistContainer.innerHTML = '';
+      rincianBox.innerHTML = ''; 
+      checklistContainer.innerHTML = '';
 
       uniqueCats.forEach(cat => {
-        const safeCat = cat.replace(/'/g, "\\'").replace(/"/g, '\\"');
-        
         // Item Rincian Dashboard yang BISA DIKLIK
         const div = document.createElement('div');
         div.className = "flex justify-between items-center p-3 rounded-xl border border-white/5 hover:border-violet-500/50 hover:bg-white/5 cursor-pointer transition-all animate-fade-in group";
@@ -428,7 +449,7 @@
       document.getElementById('selectAll').checked = true;
     }
 
-    // --- DATABASE CARD VIEW ---
+    // --- DATABASE CARD VIEW (DIPERBAIKI ANTI SYNTAX-ERROR) ---
     function renderDataCards() {
       const container = document.getElementById('dbDataContainer');
       const filterVal = document.getElementById('dbFilterVal').value.toLowerCase();
@@ -452,11 +473,13 @@
          return;
       }
 
-      container.innerHTML = categories.map(cat => {
+      let htmlString = "";
+      categories.forEach(cat => {
          const count = grouped[cat].length;
-         const safeCat = cat.replace(/'/g, "\\'").replace(/"/g, '\\"');
-         return `
-         <div onclick="openModal('${safeCat}')" class="bg-slate-800/80 p-5 rounded-xl border border-white/10 hover:border-violet-500 hover:shadow-[0_0_20px_rgba(107,70,193,0.3)] transition-all cursor-pointer transform hover:-translate-y-1 group">
+         const safeCat = cat.replace(/"/g, '&quot;');
+         
+         htmlString += `
+         <div data-cat="${safeCat}" onclick="openModal(this.dataset.cat)" class="bg-slate-800/80 p-5 rounded-xl border border-white/10 hover:border-violet-500 hover:shadow-[0_0_20px_rgba(107,70,193,0.3)] transition-all cursor-pointer transform hover:-translate-y-1 group">
            <div class="flex justify-between items-start mb-4">
              <h3 class="font-bold text-white text-base pr-2 group-hover:text-violet-400 transition-colors"><i class="fas fa-folder-open text-violet-500 mr-2"></i>${cat}</h3>
            </div>
@@ -465,10 +488,11 @@
              <span class="text-xs text-slate-400 group-hover:text-white transition-colors">Klik Rincian <i class="fas fa-arrow-right ml-1"></i></span>
            </div>
          </div>`;
-      }).join('');
+      });
+      container.innerHTML = htmlString;
     }
 
-    // --- OPEN MODAL RINCIAN & PREPARE DOWNLOAD ---
+    // --- OPEN MODAL RINCIAN & PREPARE DOWNLOAD (DIPERBAIKI) ---
     function openModal(category) {
       currentModalCatName = category;
       currentModalData = globalData.filter(r => getRowGroupKey(r) === category);
@@ -492,21 +516,33 @@
         subGroup[val] = (subGroup[val] || 0) + 1;
       });
 
-      document.getElementById('modalBreakdown').innerHTML = Object.keys(subGroup).sort().map(sub => `
+      let breakdownHtml = "";
+      Object.keys(subGroup).sort().forEach(sub => {
+        breakdownHtml += `
         <div class="bg-slate-900/80 p-3 rounded-lg border border-white/5 flex justify-between items-center shadow-inner">
           <span class="text-xs text-slate-300 truncate mr-2 font-medium" title="${sub}">${sub}</span>
           <span class="text-xs font-black text-violet-400 bg-violet-500/10 px-2 py-1 rounded">${subGroup[sub]}</span>
         </div>
-      `).join('');
+        `;
+      });
+      document.getElementById('modalBreakdown').innerHTML = breakdownHtml;
 
-      document.getElementById('modalTableHead').innerHTML = `<tr>${headers.map(h => `<th class="px-4 py-3 border-b border-white/10">${h}</th>`).join('')}</tr>`;
+      let thHtml = "";
+      headers.forEach(h => { thHtml += `<th class="px-4 py-3 border-b border-white/10">${h}</th>`; });
+      document.getElementById('modalTableHead').innerHTML = `<tr>${thHtml}</tr>`;
       
       const limitData = currentModalData.slice(0, 100);
-      document.getElementById('modalTableBody').innerHTML = limitData.map(r => `
-        <tr class="hover:bg-white/5 transition-colors">
-          ${headers.map(h => `<td class="px-4 py-2 border-b border-white/5 truncate max-w-[150px]" title="${r[h] \vert{}\vert{} ''}">${r[h] || '-'}</td>`).join('')}
-        </tr>
-      `).join('');
+      let tbHtml = "";
+      limitData.forEach(r => {
+        let tdHtml = "";
+        headers.forEach(h => {
+            const displayVal = r[h] || '-';
+            const safeTitle = String(r[h] || '').replace(/"/g, '&quot;');
+            tdHtml += `<td class="px-4 py-2 border-b border-white/5 truncate max-w-[150px]" title="${safeTitle}">${displayVal}</td>`;
+        });
+        tbHtml += `<tr class="hover:bg-white/5 transition-colors">${tdHtml}</tr>`;
+      });
+      document.getElementById('modalTableBody').innerHTML = tbHtml;
       
       if(currentModalData.length > 100) {
         document.getElementById('modalTableBody').innerHTML += `<tr><td colspan="${headers.length}" class="text-center py-4 text-slate-500 text-xs italic bg-slate-900/50">Menampilkan 100 baris pertama dari ${currentModalData.length} total baris...</td></tr>`;
